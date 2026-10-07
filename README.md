@@ -1,27 +1,41 @@
 <div align="center">
 
-<img src="assets/readme/hero.gif" width="1200" alt="COMMERCE · DJANGO — rotating 3D geometry" />
+<img src="assets/readme/hero.gif" width="1200" alt="COMMERCE · DJANGO: a shopping cart with products and a checkout receipt" />
 
 **[English](README.md) · [فارسی](README.fa.md)**
 
-<img src="assets/readme/identity.svg" width="1200" alt="commerce / English and Persian documentation" />
-
 </div>
 
-# COMMERCE · DJANGO
+# 🛒 COMMERCE · DJANGO
 
 A Django ecommerce application with product variants, guest/customer carts, inventory-aware order creation, a local payment sandbox and an operations dashboard.
 
 [GitHub](https://github.com/MOHAMMADREZAABEDINPOOR/shop) · [PIMX / Profile](https://github.com/MOHAMMADREZAABEDINPOOR) · [Static artwork](assets/readme/hero.png)
 
-## Features
+| At a glance | Details |
+|:---|:---|
+| 🛒 Experience | Web application / browser experience |
+| 🧰 Built with | `Django>=5.1,<6.2` · `Pillow>=10.0.0` · `cryptography>=42.0.0` |
+| 🌐 Documentation | [English](README.md) · [فارسی](README.fa.md) |
 
-- Catalog filtering, live search and product variants
-- Guest cart merge, addresses and multi-step checkout
-- Transactional order/payment handling and inventory locks
-- Reviews, dashboard and Persian storefront styling
+[✨ Features](#features) · [🚀 Getting started](#getting-started) · [⚙️ Configuration](#configuration) · [🌍 Deployment](#deployment)
 
-## Stack
+---
+
+<a id="features"></a>
+
+## ✨ Features
+
+| Area | Included capability |
+|:---|:---|
+| 🛍️ Commerce | Catalog filtering, live search and product variants |
+| 🛍️ Commerce | Guest cart merge, addresses and multi-step checkout |
+| 🛍️ Commerce | Transactional order/payment handling and inventory locks |
+| 🌐 Experience | Reviews, dashboard and Persian storefront styling |
+
+<a id="stack"></a>
+
+## 🧰 Stack
 
 | Tool | Version / source |
 |---|---|
@@ -29,7 +43,9 @@ A Django ecommerce application with product variants, guest/customer carts, inve
 | Pillow>=10.0.0 | `requirements.txt` |
 | cryptography>=42.0.0 | `requirements.txt` |
 
-## Getting started
+<a id="getting-started"></a>
+
+## 🚀 Getting started
 
 Python 3; a desktop/Tk installation for Tkinter or turtle examples. Tkinter is provided by the Python installation, not pip. Legacy dependencies may need a compatible Python version.
 
@@ -46,7 +62,9 @@ python manage.py seed_data
 python manage.py runserver
 ```
 
-## Configuration
+<a id="configuration"></a>
+
+## ⚙️ Configuration
 
 These names are found in the example configuration or source; not all are required. Check their defaults/usage in those files and supply secrets only in your local or hosting environment.
 
@@ -72,11 +90,15 @@ These names are found in the example configuration or source; not all are requir
 | `ZARINPAL_MERCHANT_ID` | Application setting; inspect its definition |
 | `ZARINPAL_SANDBOX` | Application setting; inspect its definition |
 
-## Usage
+<a id="usage"></a>
+
+## 🎯 Usage
 
 Copy .env.example to .env, run migrations and seed_data on a fresh development database. Open /shop/, add a product and complete /orders/checkout/. Use /dashboard/ for operations and /admin/ for Django administration.
 
-## Project structure
+<a id="project-structure"></a>
+
+## 🗂️ Project structure
 
 | Path | Role |
 |---|---|
@@ -96,28 +118,38 @@ Copy .env.example to .env, run migrations and seed_data on a fresh development d
 | [`test_dashboard_e2e.py`](test_dashboard_e2e.py) | Project entry/configuration file |
 | [`upgrade_visuals.py`](upgrade_visuals.py) | Project entry/configuration file |
 
-## Commands and checks
+<a id="commands-and-checks"></a>
+
+## 🧪 Commands and checks
 
 ```bash
 python manage.py check
 python manage.py test
 ```
 
-## Deployment
+<a id="deployment"></a>
+
+## 🌍 Deployment
 
 Configure production secrets, HTTPS, an independent database and allowed hosts. PHP hosting must use public/ as document root; Django needs static-file and WSGI/ASGI configuration. Development servers are for local use.
 
-## Limitations
+<a id="limitations"></a>
+
+## 📌 Limitations
 
 The payment gateway is a local sandbox, not a live banking integration. SQLite does not reproduce PostgreSQL row-lock behavior. Seeded accounts are development-only; local databases and media uploads are excluded.
 
-## Troubleshooting
+<a id="troubleshooting"></a>
+
+## 🛠️ Troubleshooting
 
 - Missing packages: install dependencies using the project’s package manager.
 - API/network failure: check the configured origin, provider and hosting bindings.
 - Old assets: rebuild when a build script exists, then clear the browser cache.
 
-## Contributing
+<a id="contributing"></a>
+
+## 🤝 Contributing
 
 Create a focused branch, verify the affected behavior and explain the change clearly. Keep private data, build outputs and local databases out of commits.
 
@@ -126,10 +158,20 @@ Supporting guides:
 - [DEPLOYMENT.md](DEPLOYMENT.md)
 - [SECURITY.md](SECURITY.md)
 
-## License
+<a id="license"></a>
+
+## 📄 License
 
 No repository-level license file is included in this snapshot. Public visibility alone does not grant reuse rights; contact the repository owner for terms.
 
 ---
 
 Part of **PIMX** · Documentation in English and Persian.
+
+---
+
+<div align="center">
+
+🛒 **COMMERCE · DJANGO** · [English](README.md) · [فارسی](README.fa.md)
+
+</div>
