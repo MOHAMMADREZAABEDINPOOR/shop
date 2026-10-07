@@ -1,55 +1,64 @@
 <div align="center">
 
-<img src="assets/readme/hero.gif" width="1200" alt="COMMERCE · DJANGO: a shopping cart with products and a checkout receipt" />
+<img src="assets/readme/hero.gif" width="1200" height="480" alt="SHOP 01 · DJANGO — unique animated 3D storefront scene" />
 
-**[English](README.md) · [فارسی](README.fa.md)**
+**[🌐 English](README.md) · [🇮🇷 فارسی](README.fa.md)**
 
 </div>
 
 <div dir="rtl">
 
-# 🛒 COMMERCE · DJANGO
+# 🛒 SHOP 01 · DJANGO
 
-فروشگاه Django با تنوع محصول، سبد مهمان و مشتری، ثبت سفارش با کنترل موجودی، شبیه‌ساز پرداخت محلی و داشبورد عملیات.
+**کشف محصول ← سبد خرید ← ثبت سفارش ← مدیریت فروش**
 
-[GitHub](https://github.com/MOHAMMADREZAABEDINPOOR/shop) · [PIMX / Profile](https://github.com/MOHAMMADREZAABEDINPOOR) · [بنر ثابت](assets/readme/hero.png)
+یک تجربهٔ خرید با پشتوانهٔ مدیریتی: محصول را پیدا کن، گزینه‌ها را مقایسه کن، تنوع دلخواه را انتخاب کن و سفارش را ثبت کن. پشت ویترین، Django حساب مشتری، سبد خرید، موجودی، پرداخت و مدیریت سفارش را در یک برنامه به هم متصل می‌کند.
 
-| نمای کلی | جزئیات |
+| در یک نگاه | داخل پروژه |
 |:---|:---|
-| 🛒 تجربه | برنامه وب / تجربه مرورگری |
-| 🧰 فناوری | `Django>=5.1,<6.2` · `Pillow>=10.0.0` · `cryptography>=42.0.0` |
-| 🌐 زبان راهنما | [English](README.md) · [فارسی](README.fa.md) |
+| 🎯 تمرکز | ویترین، تجربهٔ مشتری و مدیریت |
+| 🧰 Stack | Python · Django · SQLite / PostgreSQL · Pillow · cryptography |
+| 🌐 راهنما | [English](README.md) · [فارسی](README.fa.md) |
+| 🎨 تصویر | [Animated](assets/readme/hero.gif) · [Static](assets/readme/hero.png) |
 
-[✨ امکانات](#امکانات) · [🚀 شروع کار](#شروع-کار) · [⚙️ تنظیمات](#تنظیمات) · [🌍 استقرار](#استقرار)
+[✨ تجربهٔ خرید](#experience) · [🚀 اجرای محلی](#setup) · [🧱 معماری](#architecture) · [🌍 استقرار](#deployment)
 
----
+<a id="experience"></a>
 
-<a id="امکانات"></a>
+## ✨ از اولین جست‌وجو تا سفارش بعدی
 
-## ✨ امکانات
-
-| بخش | قابلیت موجود |
+| قابلیت | تجربه |
 |:---|:---|
-| 🛍️ فروشگاه | فیلتر کاتالوگ، جست‌وجوی زنده و گونه محصول |
-| 🛍️ فروشگاه | ادغام سبد مهمان، آدرس و تسویه چندمرحله‌ای |
-| 🛍️ فروشگاه | پردازش تراکنشی سفارش و پرداخت و قفل موجودی |
-| 🌐 تجربه کاربری | نظر، داشبورد و ظاهر فروشگاه فارسی |
+| 🔎 کشف محصول | پیشنهاد جست‌وجو، صفحهٔ دسته و برند، فیلتر قیمت، مرتب‌سازی و مقایسهٔ محصول. |
+| 🎛️ جزئیات محصول | تصاویر، مشخصات و انتخاب تنوع محصول. |
+| 🛒 تداوم سبد خرید | سبد مهمان و مشتری، تغییر تعداد و ادغام سبد هنگام ورود. |
+| 🏠 پنل مشتری | حساب کاربری، آدرس‌ها، علاقه‌مندی‌ها و مشاهدهٔ سفارش‌ها. |
+| 🎟️ ثبت سفارش | انتخاب آدرس، کوپن، محاسبهٔ ارسال و کنترل موجودی هنگام ثبت سفارش. |
+| 💳 پرداخت | درگاه آزمایشی تعاملی محلی و آداپتور زرین‌پال در سورس. |
+| 📦 مدیریت فروش | پردازش سفارش، نمایش موجودی، ویرایش محصول و خروجی CSV سفارش‌ها. |
+| ⭐ دیدگاه‌ها | روند ثبت دیدگاه محصول در کنار صفحه‌های فروشگاه و مشتری. |
+| 🌐 تجربهٔ کاربری | طراحی فروشگاه فارسی، تنظیمات بومی‌سازی و هویت قابل تنظیم سایت. |
 
-<a id="پشته-فنی"></a>
+### 🧭 یک دور در فروشگاه
 
-## 🧰 پشته فنی
+1. در `/shop/` محصولات را مرور، فیلتر و مقایسه کن.
+2. تنوع محصول را انتخاب و به `/cart/` اضافه کن.
+3. وارد حساب شو، آدرس را انتخاب کن و در `/orders/checkout/` ادامه بده.
+4. پرداخت آزمایشی را کامل کن و سفارش را در پنل مشتری و `/dashboard/` ببین.
 
-| ابزار | نسخه یا منبع |
-|---|---|
-| Django>=5.1,<6.2 | `requirements.txt` |
-| Pillow>=10.0.0 | `requirements.txt` |
-| cryptography>=42.0.0 | `requirements.txt` |
+| مسیر | کاربرد |
+|:---|:---|
+| `/shop/` | فهرست، فیلتر و مقایسه |
+| `/cart/` | سبد خرید |
+| `/orders/checkout/` | ثبت سفارش |
+| `/dashboard/` | مدیریت فروش |
+| `/admin/` | مدیریت Django |
 
-<a id="شروع-کار"></a>
+<a id="setup"></a>
 
-## 🚀 شروع کار
+## 🚀 اجرای محلی
 
-Python 3 و محیط دسکتاپ برای پروژه‌های Tkinter/Turtle؛ Tkinter از اجزای نصب Python است و با pip نصب نمی‌شود. برای وابستگی‌های قدیمی از نسخه Python سازگار استفاده کنید.
+Python 3.12+ و pip؛ SQLite ساده‌ترین مسیر محلی است. PostgreSQL به درایور و سرور پیکربندی‌شده نیاز دارد.
 
 <div dir="ltr">
 
@@ -58,9 +67,10 @@ git clone https://github.com/MOHAMMADREZAABEDINPOOR/shop.git
 cd shop
 
 python -m venv .venv
-# Windows: .venv\Scripts\Activate.ps1; macOS/Linux: source .venv/bin/activate
+# macOS/Linux: source .venv/bin/activate
+# Windows PowerShell: .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-# Copy .env.example to .env
+# Copy .env.example to .env and set your local keys.
 python manage.py migrate
 python manage.py seed_data
 python manage.py runserver
@@ -68,121 +78,112 @@ python manage.py runserver
 
 </div>
 
-<a id="تنظیمات"></a>
+قبل از migration، `.env.example` را به `.env` کپی کن. برای ساخت `SECRET_KEY` از `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` و برای `DATA_ENCRYPTION_KEY` مستقل از `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` استفاده کن. کلید رمزنگاری را در `.env` نگه دار و برای خواندن داده‌های قبلی تغییرش نده.
 
-## ⚙️ تنظیمات
+آدرس **http://127.0.0.1:8000** را باز کن؛ سرور داخلی برای توسعهٔ محلی است.
 
-کلیدهای زیر از فایل نمونه یا کد استخراج شده‌اند؛ همه الزاماً اجباری نیستند. مقدار و پیش‌فرض را در همان فایل بررسی و اسرار را فقط در محیط محلی یا هاست تنظیم کنید.
+### 🧪 حساب‌های نمونه
 
-| نام | کاربرد |
-|---|---|
-| `ALLOWED_HOSTS` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `ANALYTICS_ID` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `DATABASE_URL` | اعتبارنامه یا اتصال؛ خصوصی نگه دارید |
-| `DATA_ENCRYPTION_KEY` | اعتبارنامه یا اتصال؛ خصوصی نگه دارید |
-| `DEBUG` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `DEFAULT_FROM_EMAIL` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `EMAIL_BACKEND` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `EMAIL_HOST` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `EMAIL_HOST_PASSWORD` | اعتبارنامه یا اتصال؛ خصوصی نگه دارید |
-| `EMAIL_HOST_USER` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `EMAIL_PORT` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `EMAIL_USE_TLS` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `PAYMENT_GATEWAY_DEFAULT` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `PAYMENT_PUBLIC_KEY` | اعتبارنامه یا اتصال؛ خصوصی نگه دارید |
-| `PAYMENT_SECRET` | اعتبارنامه یا اتصال؛ خصوصی نگه دارید |
-| `REDIS_URL` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `SECRET_KEY` | اعتبارنامه یا اتصال؛ خصوصی نگه دارید |
-| `ZARINPAL_MERCHANT_ID` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
-| `ZARINPAL_SANDBOX` | تنظیم برنامه؛ تعریف را در منبع بررسی کنید |
+این حساب‌ها با seed محلی ساخته می‌شوند؛ فقط برای پایگاه دادهٔ تازه و نمونه‌اند. پیش از میزبانی عمومی، حساب‌ها و رمزهای نمونه را جایگزین کن.
 
-<a id="استفاده"></a>
+| نقش | Email | رمز نمونه |
+|:---|:---|:---|
+| Admin | `admin@shop.local` | `AdminPass1234!` |
+| Staff | `staff@shop.local` | `StaffPass1234!` |
+| Customer | `customer1@shop.local` | `CustomerPass1234!` |
 
-## 🎯 استفاده
+## ⚙️ تنظیمات کاربردی
 
-نمونه محیط را به .env کپی و روی دیتابیس توسعه تازه migrate و seed_data را اجرا کنید. /shop/ را باز، محصول اضافه و /orders/checkout/ را تکمیل کنید. /dashboard/ برای عملیات و /admin/ برای مدیریت Django است.
+از [`.env.example`](.env.example) شروع کن؛ مقادیر واقعی در `.env` محلی یا محیط میزبان قرار بگیرند.
 
-<a id="ساختار-پروژه"></a>
+| تنظیم | کاربرد |
+|:---|:---|
+| `SECRET_KEY` | کلید امضا و نشست Django؛ مقدار مستقل تنظیم کن. |
+| `DEBUG / ALLOWED_HOSTS` | حالت توسعه و دامنه‌های مجاز. |
+| `DATABASE_URL` | خالی برای SQLite؛ رشتهٔ اتصال postgres:// برای PostgreSQL. |
+| `DATA_ENCRYPTION_KEY` | کلید اختصاصی Fernet برای فیلدهای رمزنگاری‌شده. |
+| `PAYMENT_GATEWAY_DEFAULT` | پیش‌فرض توسعهٔ محلی sandbox است. |
+| `ZARINPAL_MERCHANT_ID` | شناسهٔ پذیرنده برای آداپتور زرین‌پال. |
+| `EMAIL_BACKEND / EMAIL_HOST*` | ایمیل کنسولی محلی؛ برای ارسال واقعی SMTP را تنظیم کن. |
 
-## 🗂️ ساختار پروژه
+<a id="architecture"></a>
 
-| مسیر | نقش |
-|---|---|
-| [`accounts/`](accounts/) | اپ حساب |
-| [`assets/`](assets/) | فایل برند، رسانه و README |
-| [`cart/`](cart/) | فرآیند سبد |
-| [`catalog/`](catalog/) | کاتالوگ محصول |
-| [`dashboard/`](dashboard/) | داشبورد عملیات |
-| [`docs/`](docs/) | راهنمای تکمیلی |
-| [`orders/`](orders/) | فرآیند سفارش |
-| [`payments/`](payments/) | فرآیند پرداخت |
-| [`static/`](static/) | فایل استاتیک وب |
-| [`templates/`](templates/) | قالب سمت سرور |
-| [`manage.py`](manage.py) | فایل ورودی یا تنظیم پروژه |
-| [`populate_reviews_variants.py`](populate_reviews_variants.py) | فایل ورودی یا تنظیم پروژه |
-| [`setup_visuals.py`](setup_visuals.py) | فایل ورودی یا تنظیم پروژه |
-| [`test_dashboard_e2e.py`](test_dashboard_e2e.py) | فایل ورودی یا تنظیم پروژه |
-| [`upgrade_visuals.py`](upgrade_visuals.py) | فایل ورودی یا تنظیم پروژه |
-
-<a id="فرمان‌ها-و-بررسی"></a>
-
-## 🧪 فرمان‌ها و بررسی
+## 🧱 اجزای برنامه چگونه کنار هم کار می‌کنند
 
 <div dir="ltr">
 
-```bash
-python manage.py check
-python manage.py test
+```mermaid
+flowchart LR
+    Browser --> Django[Views + domain apps]
+    Django --> Catalog[Catalog + cart]
+    Django --> Orders[Orders + payments]
+    Catalog --> DB[(SQLite / PostgreSQL)]
+    Orders --> DB
+    Django --> Dashboard[Staff dashboard]
 ```
 
 </div>
 
-<a id="استقرار"></a>
+| مسیر | مسئولیت |
+|:---|:---|
+| [`shop_project/`](shop_project/) | تنظیمات، مسیرها و WSGI |
+| [`catalog/`](catalog/) | محصول، تنوع، فیلتر و مقایسه |
+| [`accounts/`](accounts/) | کاربر، آدرس و اطلاعات مشتری |
+| [`cart/`](cart/) · [`orders/`](orders/) · [`payments/`](payments/) | دامنه‌های سبد، سفارش و پرداخت |
+| [`dashboard/`](dashboard/) | مدیریت فروش و گزارش‌ها |
+| [`templates/`](templates/) · [`static/`](static/) | قالب‌ها و فایل‌های رابط |
 
-## 🌍 استقرار
+## 💳 رفتار واقعی پرداخت
 
-فایل محیط واقعی، HTTPS، دیتابیس مستقل و میزبان مجاز تنظیم کنید. در PHP ریشه وب را public/ و در Django فایل استاتیک و WSGI/ASGI را تنظیم کنید. سرور توسعه برای میزبانی عمومی نیست.
+درگاه پیش‌فرض آزمایشی است و کارت واقعی را شارژ نمی‌کند. آداپتور زرین‌پال در سورس وجود دارد؛ استفادهٔ واقعی به حساب پذیرنده، callback صحیح و اعتبارسنجی اتصال به سرویس نیاز دارد. تغییر متغیر محیطی به‌تنهایی به معنی تأیید پرداخت واقعی نیست.
 
-<a id="محدودیت‌ها"></a>
+<a id="deployment"></a>
 
-## 📌 محدودیت‌ها
+## 🌍 از اجرای محلی تا میزبانی
 
-درگاه پرداخت شبیه‌ساز محلی است و اتصال بانکی واقعی نیست. SQLite رفتار قفل ردیف PostgreSQL را بازسازی نمی‌کند. حساب نمونه فقط برای توسعه است؛ دیتابیس و رسانه محلی منتشر نمی‌شوند.
+از سرور برنامهٔ Python پشت HTTPS استفاده کن؛ static و media را جدا سرو کن، `DEBUG=False`، دامنه‌های مجاز و کلیدهای مستقل را تنظیم و از پایگاه داده و فایل‌های آپلودشده نسخهٔ پشتیبان تهیه کن. برای PostgreSQL، `psycopg[binary]` را صریح نصب کن. [DEPLOYMENT.md](DEPLOYMENT.md) مسیر Gunicorn/Nginx/PostgreSQL و [SECURITY.md](SECURITY.md) کنترل‌های برنامه را توضیح می‌دهند.
 
-<a id="رفع-مشکل"></a>
+## 🧪 بررسی‌های توسعه‌دهندگان
 
-## 🛠️ رفع مشکل
+| دستور | هدف |
+|:---|:---|
+| `python manage.py check` | بررسی ساختار Django |
+| `python manage.py test catalog cart orders payments` | آزمون دامنه‌های فروش |
+| `python manage.py collectstatic --noinput` | جمع‌آوری فایل‌های استاتیک |
 
-- پکیج غایب: وابستگی را با مدیر پکیج پروژه نصب کنید.
-- خطای API یا شبکه: آدرس، سرویس و اتصال میزبانی را بررسی کنید.
-- فایل قدیمی: در صورت وجود اسکریپت ساخت، build و کش مرورگر را تازه کنید.
+این‌ها دستورهای بررسی موجودند؛ فهرست آن‌ها به معنی اجرای آزمون کامل برنامه در این تغییر مستندات نیست.
 
-<a id="مشارکت"></a>
+## 🧩 رفع اشکال
 
-## 🤝 مشارکت
+| نشانه | راهکار |
+|:---|:---|
+| درایور PostgreSQL نصب نیست | `psycopg[binary]` را در محیط فعال نصب کن. |
+| تصاویر دیده نمی‌شوند | مسیر `media/`، رکورد تصویر محصول و تنظیم سرو فایل را بررسی کن. |
+| ثبت سفارش متوقف شده | آدرس و موجودی فعلی محصول و تنوع آن را بررسی کن. |
 
-برای تغییر، شاخه مستقل بسازید، رفتار فعلی را بررسی کنید و توضیح روشن همراه تغییر بفرستید. اطلاعات خصوصی، خروجی build و دیتابیس محلی را commit نکنید.
+## 🧭 سه رویکرد به ساخت فروشگاه
 
-راهنماهای همراه:
+| پروژه | رویکرد |
+|:---|:---|
+| [SHOP 01](https://github.com/MOHAMMADREZAABEDINPOOR/shop) | دامنه‌های Django، سفارش با کنترل موجودی و داشبورد فروش |
+| [SHOP 02](https://github.com/MOHAMMADREZAABEDINPOOR/shop2) | سرویس‌های Laravel، تنوع محصول و مدیریت با نقش |
+| [NEXTSHOP](https://github.com/MOHAMMADREZAABEDINPOOR/shop3) | PHP مستقیم، MVC و روتر کوچک و آماده‌سازی SQLite |
 
-- [DEPLOYMENT.md](DEPLOYMENT.md)
-- [SECURITY.md](SECURITY.md)
+## 🤝 بازخورد و مشارکت
 
-<a id="مجوز"></a>
+در issue، صفحه، رفتار مورد انتظار و مراحل بازتولید را بنویس. تغییر کد را در شاخهٔ مشخص و همراه بررسی مرتبط انجام بده.
+
+[Issues](https://github.com/MOHAMMADREZAABEDINPOOR/shop/issues) · [PIMX](https://github.com/MOHAMMADREZAABEDINPOOR)
 
 ## 📄 مجوز
 
-فایل مجوز در این نسخه موجود نیست. نمایش عمومی کد به‌تنهایی مجوز استفاده مجدد نیست؛ برای شرایط استفاده با مالک مخزن هماهنگ کنید.
-
----
-
-ساخته‌شده در مجموعه **PIMX** · مستندات فارسی و انگلیسی.
+در این نسخه فایل مجوز در سطح مخزن وجود ندارد؛ برای شرایط استفادهٔ مجدد با مالک هماهنگ کن.
 
 ---
 
 <div align="center">
 
-🛒 **COMMERCE · DJANGO** · [English](README.md) · [فارسی](README.fa.md)
+🛒 **SHOP 01 · DJANGO** · [English](README.md) · [فارسی](README.fa.md)
 
 </div>
 
