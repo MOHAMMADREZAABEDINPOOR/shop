@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}{% tr 'Proceed to Checkout' %} | {{ site_settings.site_name|tr:request.LANGUAGE_CODE }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Checkout Progress Stepper -->
+  <div class="checkout-steps" style="display: flex; justify-content: center; align-items: center; margin-bottom: 2.5rem; gap: 1rem; font-size: 0.9rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--success); font-weight: 700;">
+      <span style="width: 28px; height: 28px; border-radius: 50%; background-color: var(--success); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✓</span>
+      <span class="checkout-step-label">{% tr '1. Cart' %}</span>
+    </div>
+    <div class="checkout-step-line" style="width: 40px; height: 2px; background-color: var(--primary);"></div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--primary); font-weight: 700;">
+      <span style="width: 28px; height: 28px; border-radius: 50%; background-color: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">۲</span>
+      <span class="checkout-step-label">{% tr '2. Shipping & Payment' %}</span>
+    </div>
+    <div class="checkout-step-line" style="width: 40px; height: 2px; background-color: var(--border);"></div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted);">
+      <span style="width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">۳</span>
+      <span class="checkout-step-label">{% tr '3. Bank Gateway & Confirmation' %}</span>
+    </div>
+  </div>
+
+  <form id="checkout-form" action="{% url 'orders:checkout' %}" method="POST">
+    {% csrf_token %}
+
+    <div class="split-main-side">
+      
+      <!-- Left Column: Address, Shipping, Payment Method -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- 1. Address Selection -->
+        <div class="card reveal">
+          <div class="flex justify-between items-center" style="margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+            <h3 style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+              <span>📍</span> {% tr 'Select Shipping Address' %}
+            </h3>
+            <a href="{% url 'accounts:address_create' %}?next={% url 'orders:checkout' %}" class="btn btn-outline btn-sm">
+              {% tr '+ Add New Address' %}
+            </a>
+          </div>
+
+          {% if addresses %}
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              {% for addr in addresses %}
+                <label class="choice-card" style="display: flex; align-items: flex-start; gap: 0.85rem; padding: 1rem; border: 1.5px solid {% if addr.is_default or forloop.first %}var(--primary){% else %}var(--border){% endif %}; border-radius: var(--radius-md); cursor: pointer; background-color: var(--bg-surface);">
+                  <input type="radio" name="address_id" value="{{ addr.id }}" {% if addr.is_default or forloop.first %}checked{% endif %} style="margin-top: 0.3rem;">
+                  <div style="flex: 1;">
+                    <div class="flex justify-between items-center" style="margin-bottom: 0.35rem;">
+                      <strong style="font-size: 0.95rem;">{{ addr.title }} ({% if request.LANGUAGE_CODE == 'en' %}Receiver: {{ addr.receiver_name }}{% else %}تحویل گیرنده: {{ addr.receiver_name }}{% endif %})</strong>
+                      <span style="font-size: 0.85rem; color: var(--text-muted);">{% if request.LANGUAGE_CODE == 'en' %}Phone:{% else %}تلفن:{% endif %} {{ addr.receiver_phone }}</span>
+                    </div>
+                    <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+                      {{ addr.province }}، {{ addr.city }} - {{ addr.address_line }} ({% if request.LANGUAGE_CODE == 'en' %}Postal Code: {{ addr.postal_code }}{% else %}کد پستی: {{ addr.postal_code }}{% endif %})
+                    </div>
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div style="text-align: center; padding: 2rem; border: 1px dashed var(--border); border-radius: var(--radius-md);">
+              <p style="margin-bottom: 1rem; color: var(--text-muted);">{% tr "You haven't saved any shipping addresses yet." %}</p>
+              <a href="{% url 'accounts:address_create' %}?next={% url 'orders:checkout' %}" class="btn btn-primary">
+                {% tr 'Add First Shipping Address' %}
+              </a>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- 2. Shipping Method Selection -->
+        <div class="card reveal">
+          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🚚</span> {% tr 'Select Shipping Method' %}
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <label class="choice-card" style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer;">
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <input type="radio" name="shipping_method" value="پست پیشتاز" checked>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem;">{% tr 'Express Post' %}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">{% tr '24 to 48 business hours nationwide delivery' %}</div>
+                </div>
+              </div>
+              <span style="font-weight: 700; font-size: 0.9rem;">{{ shipping_cost|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}</span>
+            </label>
+
+            <label class="choice-card" style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer;">
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <input type="radio" name="shipping_method" value="تیپاکس اکسپرس">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem;">{% tr 'Tipax Express' %}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">{% tr 'Home delivery with full item insurance' %}</div>
+                </div>
+              </div>
+              <span style="font-weight: 700; font-size: 0.9rem;">{% tr 'Pay on Delivery' %}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 3. Payment Method -->
+        <div class="card reveal">
+          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>💳</span> {% tr 'Select Payment Method' %}
+          </h3>
+          <div style="padding: 1rem; border: 1.5px solid var(--primary); border-radius: var(--radius-md); background-color: var(--primary-light); display: flex; align-items: center; gap: 0.75rem;">
+            <input type="radio" name="payment_method" value="online" checked>
+            <div>
+              <strong style="font-size: 0.95rem; color: var(--primary);">{% tr 'Online Bank Payment' %}</strong>
+              <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem;">{% tr 'Instant connection to national banking gateway (Saman / ZarinPal)' %}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Notes -->
+        <div class="card reveal">
+          <label class="form-label" style="margin-bottom: 0.5rem;">{% tr 'Order Notes (Optional):' %}</label>
+          <textarea name="customer_notes" rows="2" class="form-input" placeholder="{% tr 'Additional delivery details, recipient time preference...' %}"></textarea>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Order Summary & Coupon -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem; position: sticky; top: 90px;">
+        
+        <!-- Coupon Box -->
+        <div class="card reveal">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem;">{% if request.LANGUAGE_CODE == 'en' %}Discount Coupon{% else %}کد تخفیف{% endif %}</h4>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="coupon-input" placeholder="{% if request.LANGUAGE_CODE == 'en' %}Enter coupon code...{% else %}کد تخفیف...{% endif %}" value="{{ applied_coupon.code|default:'' }}" class="form-input" style="font-size: 0.85rem; padding: 0.5rem; text-transform: uppercase;">
+            <button type="button" onclick="applyCoupon()" class="btn btn-outline btn-sm">{% if request.LANGUAGE_CODE == 'en' %}Apply{% else %}اعمال{% endif %}</button>
+          </div>
+          <div id="coupon-msg" style="font-size: 0.8rem; margin-top: 0.5rem;"></div>
+        </div>
+
+        <!-- Totals Review -->
+        <div class="card reveal">
+          <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+            {% tr 'Order Invoice' %}
+          </h4>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; margin-bottom: 1.25rem;">
+            <div class="flex justify-between">
+              <span style="color: var(--text-secondary);">{% tr 'Items Subtotal:' %}</span>
+              <span>{{ subtotal|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}</span>
+            </div>
+            
+            <div class="flex justify-between" id="discount-row" style="color: var(--danger); {% if discount_amount == 0 %}display:none;{% endif %}">
+              <span>{% if request.LANGUAGE_CODE == 'en' %}Applied Discount:{% else %}تخفیف اعمال شده:{% endif %}</span>
+              <span id="summary-discount">-{{ discount_amount|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}</span>
+            </div>
+
+            <div class="flex justify-between">
+              <span style="color: var(--text-secondary);">{% tr 'Shipping Cost:' %}</span>
+              <span>{% if shipping_cost == 0 %}<span style="color:var(--success);">{% tr 'Free' %}</span>{% else %}{{ shipping_cost|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}{% endif %}</span>
+            </div>
+          </div>
+
+          <div style="border-top: 2px solid var(--border); padding-top: 1rem; margin-bottom: 1.5rem;" class="flex justify-between items-center">
+            <span style="font-weight: 700; font-size: 1rem;">{% tr 'Total Payable:' %}</span>
+            <span id="summary-grandtotal" style="font-size: 1.4rem; font-weight: 800; color: var(--primary);">
+              {{ grand_total|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}
+            </span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block" style="box-shadow: 0 4px 15px var(--primary-glow);">
+            🔒 {% tr 'Pay & Place Order' %}
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </form>
+
+</div>
+
+<script>
+function applyCoupon() {
+  const code = document.getElementById('coupon-input').value.trim();
+  const msgEl = document.getElementById('coupon-msg');
+  if (!code) return;
+
+  const formData = new FormData();
+  formData.append('code', code);
+  formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+  fetch('/orders/api/apply-coupon/', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      msgEl.textContent = data.message;
+      msgEl.style.color = 'var(--success)';
+      document.getElementById('discount-row').style.display = 'flex';
+      document.getElementById('summary-discount').textContent = `-${data.discount_amount} {% tr 'Currency Toman' %}`;
+      document.getElementById('summary-grandtotal').textContent = `${data.new_grand_total} {% tr 'Currency Toman' %}`;
+      showToast(data.message, 'success');
+    } else {
+      msgEl.textContent = data.message;
+      msgEl.style.color = 'var(--danger)';
+      showToast(data.message, 'danger');
+    }
+  });
+}
+</script>
+{% endblock %}

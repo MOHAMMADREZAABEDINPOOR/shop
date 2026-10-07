@@ -1,0 +1,249 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}
+  {% if is_create %}افزودن محصول جدید به فروشگاه{% else %}ویرایش کالا «{{ product.name }}»{% endif %} | پنل مدیریت
+{% endblock %}
+
+{% block dashboard_content %}
+  <!-- Breadcrumb -->
+  <div style="font-size: 0.85rem; color: var(--text-muted);">
+    <a href="{% url 'dashboard:overview' %}" style="color: var(--primary);">داشبورد</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <a href="{% url 'dashboard:products' %}" style="color: var(--primary);">مدیریت محصولات</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <span style="color: var(--text-primary); font-weight: 600;">
+      {% if is_create %}افزودن محصول جدید{% else %}ویرایش محصول{% endif %}
+    </span>
+  </div>
+
+  <div class="card" style="padding: 2rem;">
+    <div style="border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 2rem;">
+      <h1 style="font-size: 1.6rem; font-weight: 800; display: flex; align-items: center; gap: 0.6rem;">
+        <span>{% if is_create %}<svg class="icon icon-lg" aria-hidden="true"><use href="#i-spark"/></svg>{% else %}<svg class="icon icon-lg" aria-hidden="true"><use href="#i-edit"/></svg>{% endif %}</span>
+        <span>{% if is_create %}افزودن محصول جدید به کاتالوگ فروشگاه{% else %}ویرایش مشخصات و قیمت «{{ product.name }}»{% endif %}</span>
+      </h1>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.35rem;">
+        مشخصات فنی، قیمت‌گذاری، تخفیف، عکس‌های اختصاصی و موجودی انبار را وارد یا ویرایش نمایید.
+      </p>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" id="productForm">
+      {% csrf_token %}
+
+      <!-- 1. General Information -->
+      <div style="margin-bottom: 2rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary);">
+          ۱. اطلاعات پایه و شناسنامه کالا
+        </h3>
+
+        <div class="form-grid-2" style="margin-bottom: 1.25rem;">
+          <div>
+            <label class="form-label" style="font-weight: 700;">نام کامل محصول *</label>
+            <input type="text" name="name" value="{% if not is_create %}{{ product.name }}{% endif %}" class="form-input" required placeholder="مثال: گوشی موبایل سامسونگ Galaxy S24 Ultra" style="font-size: 0.95rem;">
+          </div>
+          <div>
+            <label class="form-label" style="font-weight: 700;">شناسه اختصاصی کالا (SKU)</label>
+            <input type="text" name="sku" value="{% if not is_create %}{{ product.sku }}{% endif %}" class="form-input" placeholder="خودکار در صورت خالی بودن" style="font-family: var(--font-mono); font-size: 0.9rem;">
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom: 1.25rem;">
+          <div>
+            <label class="form-label" style="font-weight: 700;">دسته‌بندی کالا *</label>
+            <select name="category" class="form-select" required style="font-size: 0.92rem;">
+              <option value="">انتخاب دسته‌بندی...</option>
+              {% for c in categories %}
+                <option value="{{ c.id }}" {% if not is_create and product.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="form-label" style="font-weight: 700;">برند سازنده</label>
+            <select name="brand" class="form-select" style="font-size: 0.92rem;">
+              <option value="">بدون برند / سایر</option>
+              {% for b in brands %}
+                <option value="{{ b.id }}" {% if not is_create and product.brand_id == b.id %}selected{% endif %}>{{ b.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Pricing & Inventory -->
+      <div style="margin-bottom: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary);">
+          ۲. قیمت‌گذاری، تخفیف و موجودی انبار
+        </h3>
+
+        <div class="form-grid-2" style="margin-bottom: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+          <div>
+            <label class="form-label" style="font-weight: 700;">قیمت اصلی و پایه (تومان) *</label>
+            <input type="number" id="base_price" name="base_price" value="{% if not is_create %}{{ product.base_price|floatformat:0 }}{% endif %}" class="form-input" required placeholder="مثال: 54000000" oninput="calculateDiscount()">
+          </div>
+
+          <div>
+            <label class="form-label" style="font-weight: 700;">قیمت فروش ویژه / تخفیف‌دار (تومان)</label>
+            <input type="number" id="sale_price" name="sale_price" value="{% if not is_create and product.sale_price %}{{ product.sale_price|floatformat:0 }}{% endif %}" class="form-input" placeholder="اختیاری - در صورت داشتن تخفیف" oninput="calculateDiscount()">
+            <div id="discount_preview" style="font-size: 0.8rem; color: var(--danger); font-weight: 700; margin-top: 0.35rem;"></div>
+          </div>
+
+          <div>
+            <label class="form-label" style="font-weight: 700;">موجودی انبار *</label>
+            <input type="number" name="stock" value="{% if not is_create %}{{ product.stock }}{% else %}15{% endif %}" class="form-input" required min="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Images Upload & Gallery -->
+      <div style="margin-bottom: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary);">
+          ۳. عکس‌های کالا و آلبوم چند زاویه‌ای
+        </h3>
+
+        {% if not is_create and product.images.all %}
+          <div style="margin-bottom: 1.25rem;">
+            <label class="form-label">تصاویر فعلی در آلبوم محصول:</label>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              {% for img in product.images.all %}
+                <div style="position: relative; width: 84px; height: 84px; border: 1.5px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-subtle);">
+                  <img src="{{ img.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: contain;">
+                  {% if img.is_feature %}
+                    <span style="position: absolute; bottom: 0; inset-inline-start: 0; width: 100%; background: var(--primary); color: #fff; font-size: 0.65rem; text-align: center;">اصلی</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <div style="margin-bottom: 1rem;">
+          <label class="form-label" style="font-weight: 700;">
+            {% if is_create %}آپلود تصویر اصلی محصول{% else %}افزودن تصویر جدید به آلبوم{% endif %}
+          </label>
+          <input type="file" name="{% if is_create %}image{% else %}new_image{% endif %}" accept="image/*" class="form-input" style="padding: 0.4rem;">
+        </div>
+
+        {% if is_create %}
+          <div style="margin-bottom: 1rem;">
+            <label class="form-label">یا مسیر تصویر در پوشه media (اختیاری):</label>
+            <input type="text" name="image_url" class="form-input" placeholder="مثال: products/samsung-galaxy-s24-ultra.jpg" style="font-family: var(--font-mono); font-size: 0.85rem;">
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- 4. Descriptions -->
+      <div style="margin-bottom: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary);">
+          ۴. توضیحات و نقد و بررسی
+        </h3>
+
+        <div style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="font-weight: 700;">توضیحات کوتاه و چکیده محصول</label>
+          <textarea name="short_description" rows="2" class="form-input" placeholder="یک یا دو جمله خلاصه درباره مهم‌ترین ویژگی‌های کالا">{% if not is_create %}{{ product.short_description }}{% endif %}</textarea>
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="font-weight: 700;">توضیحات کامل و نقد تخصصی</label>
+          <textarea name="description" rows="5" class="form-input" placeholder="توضیحات جامع محصول برای صفحه اختصاصی کالا">{% if not is_create %}{{ product.description }}{% endif %}</textarea>
+        </div>
+      </div>
+
+      <!-- 5. Technical Specifications (Dynamic Rows) -->
+      {% if is_create %}
+      <div style="margin-bottom: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <div class="flex justify-between items-center" style="margin-bottom: 1rem;">
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary);">
+            ۵. جدول مشخصات فنی اولیه (اختیاری)
+          </h3>
+          <button type="button" class="btn btn-outline btn-sm" onclick="addSpecRow()">+ افزودن ویژگی جدید</button>
+        </div>
+
+        <div id="specsContainer">
+          <div class="spec-row">
+            <input type="text" name="spec_key[]" class="form-input" placeholder="عنوان ویژگی (مثلاً: پردازنده)">
+            <input type="text" name="spec_value[]" class="form-input" placeholder="مقدار ویژگی (مثلاً: Apple A18 Pro)">
+            <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.remove()" style="color: var(--danger);">✕</button>
+          </div>
+          <div class="spec-row">
+            <input type="text" name="spec_key[]" class="form-input" placeholder="عنوان ویژگی (مثلاً: حافظه رم)">
+            <input type="text" name="spec_value[]" class="form-input" placeholder="مقدار ویژگی (مثلاً: 16 گیگابایت)">
+            <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.remove()" style="color: var(--danger);">✕</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 6. Display Flags -->
+      <div style="margin-bottom: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary);">
+          {% if is_create %}۶{% else %}۵{% endif %}. برچسب‌ها و وضعیت نمایش در صفحه اصلی
+        </h3>
+
+        <div style="display: flex; gap: 1.75rem; flex-wrap: wrap;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600;">
+            <input type="checkbox" name="is_featured" value="1" {% if not is_create and product.is_featured %}checked{% endif %} class="form-checkbox">
+            <span>محصول ویژه (نمایش در برگزیده‌های صفحه اصلی)</span>
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600;">
+            <input type="checkbox" name="is_bestseller" value="1" {% if not is_create and product.is_bestseller %}checked{% endif %} class="form-checkbox">
+            <span>پرفروش‌ترین ماه</span>
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600;">
+            <input type="checkbox" name="is_new_arrival" value="1" {% if not is_create and product.is_new_arrival %}checked{% endif %} class="form-checkbox">
+            <span>جدیدترین کالا</span>
+          </label>
+
+          {% if not is_create %}
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600;">
+              <input type="checkbox" name="is_active" value="1" {% if product.is_active %}checked{% endif %} class="form-checkbox">
+              <span style="color: var(--success);">کالا فعال و قابل سفارش در سایت باشد</span>
+            </label>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 1rem; justify-content: flex-end; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <a href="{% url 'dashboard:products' %}" class="btn btn-outline">انصراف و بازگشت</a>
+        <button type="submit" class="btn btn-primary btn-lg btn-shimmer" style="font-weight: 800; min-width: 200px;">
+          {% if is_create %}✓ ثبت نهایی محصول در فروشگاه{% else %}✓ ذخیره تغییرات کالا{% endif %}
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+<script>
+function calculateDiscount() {
+  const basePriceInput = document.getElementById('base_price');
+  const salePriceInput = document.getElementById('sale_price');
+  const preview = document.getElementById('discount_preview');
+
+  const base = parseFloat(basePriceInput.value);
+  const sale = parseFloat(salePriceInput.value);
+
+  if (base > 0 && sale > 0 && sale < base) {
+    const pct = Math.round(((base - sale) / base) * 100);
+    preview.innerText = `<svg class="icon icon-lg" aria-hidden="true"><use href="#i-spark"/></svg> درصد تخفیف محاسبه‌شده: ${pct}٪ تخفیف`;
+  } else {
+    preview.innerText = '';
+  }
+}
+
+function addSpecRow() {
+  const container = document.getElementById('specsContainer');
+  const div = document.createElement('div');
+  div.className = 'spec-row';
+  div.innerHTML = `
+    <input type="text" name="spec_key[]" class="form-input" placeholder="عنوان ویژگی">
+    <input type="text" name="spec_value[]" class="form-input" placeholder="مقدار ویژگی">
+    <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.remove()" style="color: var(--danger);">✕</button>
+  `;
+  container.appendChild(div);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}مدیریت {{ site_title|default:"فروشگاه آوانگارد" }}{% endblock %}
+
+{% block extrastyle %}
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/admin_theme.css' %}">
+<meta name="theme-color" content="#D97706">
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">🛍️ پنل مدیریت آوانگارد</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block footer %}
+<div id="footer">
+  <span>پنل مدیریت فروشگاه آوانگارد — قدرت‌گرفته از Django {{ django_version|default:"5" }} 🐍</span>
+</div>
+{% endblock %}

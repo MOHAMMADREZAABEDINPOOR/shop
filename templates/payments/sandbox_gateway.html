@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}درگاه پرداخت امن بانکی (محیط تست / Sandbox){% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 680px; margin: 2rem auto;">
+
+  <!-- Bank Gateway Simulated Card -->
+  <div class="card" style="padding: 2rem; border-top: 5px solid #D97706; box-shadow: var(--shadow-xl);">
+    
+    <!-- Bank Header -->
+    <div class="flex justify-between items-center" style="border-bottom: 2px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 2rem;">🏦</span>
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: #065f46;">درگاه پرداخت اینترنتی شاپرک (Sandbox)</h2>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">سامانه پرداخت الکترونیک بانک مرکزی جمهوری اسلامی ایران</div>
+        </div>
+      </div>
+      <div style="text-align: left;">
+        <div style="font-size: 0.75rem; color: var(--text-muted);">زمان باقی‌مانده:</div>
+        <div id="countdown-timer" style="font-size: 1.25rem; font-weight: 800; color: var(--danger); font-family: var(--font-mono);">09:59</div>
+      </div>
+    </div>
+
+    <!-- Merchant Details Box -->
+    <div class="split-2" style="background-color: var(--bg-subtle); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1.75rem; font-size: 0.88rem;">
+      <div>پذیرنده: <strong>{{ site_settings.site_name }}</strong></div>
+      <div>شماره سفارش: <strong>{{ order.order_number }}</strong></div>
+      <div>شناسه تراکنش: <span style="font-family: var(--font-mono); font-size: 0.8rem;">{{ payment.transaction_id }}</span></div>
+      <div>مبلغ قابل پرداخت: <strong style="font-size: 1.05rem; color: var(--primary);">{{ amount|toman }} تومان</strong></div>
+    </div>
+
+    <!-- Gateway Form -->
+    <form action="{% url 'payments:verify' payment.transaction_id %}" method="POST" id="bank-payment-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" id="gateway-action" value="success">
+
+      <!-- Card Number -->
+      <div class="form-group">
+        <label class="form-label">شماره ۱۶ رقمی کارت بانکی:</label>
+        <div style="display: flex; gap: 0.5rem; direction: ltr;">
+          <input type="text" name="card_part1" maxlength="4" value="6037" class="form-input" style="text-align: center; font-family: var(--font-mono); font-weight: 700;">
+          <input type="text" name="card_part2" maxlength="4" value="9918" class="form-input" style="text-align: center; font-family: var(--font-mono); font-weight: 700;">
+          <input type="text" name="card_part3" maxlength="4" value="3821" class="form-input" style="text-align: center; font-family: var(--font-mono); font-weight: 700;">
+          <input type="text" name="card_part4" maxlength="4" value="4219" class="form-input" style="text-align: center; font-family: var(--font-mono); font-weight: 700;">
+        </div>
+      </div>
+
+      <div class="split-2" style="margin-bottom: 1rem;">
+        <!-- CVV2 -->
+        <div class="form-group">
+          <label class="form-label">کد شناسایی دوم (CVV2):</label>
+          <input type="password" name="cvv2" maxlength="4" value="782" class="form-input" style="text-align: center; font-family: var(--font-mono);">
+        </div>
+
+        <!-- Expiration Date -->
+        <div class="form-group">
+          <label class="form-label">تاریخ انقضای کارت:</label>
+          <div style="display: flex; gap: 0.5rem; direction: ltr;">
+            <input type="text" name="exp_month" maxlength="2" value="08" placeholder="ماه" class="form-input" style="text-align: center; font-family: var(--font-mono);">
+            <input type="text" name="exp_year" maxlength="2" value="06" placeholder="سال" class="form-input" style="text-align: center; font-family: var(--font-mono);">
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic OTP / رمز پویا -->
+      <div class="form-group" style="margin-bottom: 2rem;">
+        <label class="form-label">رمز اینترنتی (رمز پویا):</label>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <input type="password" name="otp" value="849201" class="form-input" placeholder="کد پیامک‌شده" style="font-family: var(--font-mono); font-size: 1rem; text-align: center; flex: 1; min-width: 140px;">
+          <button type="button" class="btn btn-outline" onclick="showToast('رمز پویای تستی: 849201', 'info')">درخواست رمز پویا</button>
+        </div>
+      </div>
+
+      <!-- Simulated Gateway Action Triggers -->
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <button type="button" onclick="submitGateway('success')" class="btn btn-primary btn-lg" style="background-color: var(--success); border-color: var(--success);">
+          ✓ پرداخت موفقیت‌آمیز (شبیه‌سازی کارت معتبر)
+        </button>
+        
+        <button type="button" onclick="submitGateway('fail')" class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);">
+          ✕ شبیه‌سازی خطا در پرداخت (رمز نامعتبر / موجودی ناکافی)
+        </button>
+
+        <button type="button" onclick="submitGateway('cancel')" class="btn btn-outline" style="color: var(--text-muted);">
+          انصراف و بازگشت به فروشگاه
+        </button>
+      </div>
+
+    </form>
+
+    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.78rem; color: var(--text-muted); text-align: center;">
+      🔒 این درگاه یک شبیه‌ساز امن (Sandbox Gateway) برای آزمایش جریان خرید است و هیچ وجه واقعی کسر نمی‌گردد.
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+function submitGateway(action) {
+  document.getElementById('gateway-action').value = action;
+  document.getElementById('bank-payment-form').submit();
+}
+
+// 10-Minute Countdown Timer
+let timeLeft = 600;
+const timerEl = document.getElementById('countdown-timer');
+setInterval(() => {
+  if (timeLeft <= 0) {
+    submitGateway('cancel');
+  } else {
+    timeLeft--;
+    const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const seconds = (timeLeft % 60).toString().padStart(2, '0');
+    timerEl.textContent = `${minutes}:${seconds}`;
+  }
+}, 1000);
+</script>
+{% endblock %}

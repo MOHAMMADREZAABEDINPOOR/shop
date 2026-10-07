@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}{{ product.name|tr:request.LANGUAGE_CODE }} | {{ site_settings.site_name|tr:request.LANGUAGE_CODE }}{% endblock %}
+{% block meta_description %}{{ product.meta_description|default:product.short_description|truncatewords:25 }}{% endblock %}
+{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{{ product.get_primary_image }}{% endblock %}
+{% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{{ product.get_primary_image }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Breadcrumb -->
+  <nav style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+    <a href="{% url 'core:home' %}">{% tr 'Home' %}</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <a href="{% url 'catalog:shop' %}">{% tr 'Shop' %}</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <a href="{% url 'catalog:shop' %}?category={{ product.category.slug }}">{{ product.category.name|tr:request.LANGUAGE_CODE }}</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <span style="color: var(--text-primary); font-weight: 600;">{{ product.name|tr:request.LANGUAGE_CODE }}</span>
+  </nav>
+
+  <!-- Product Main Section (Gallery + Details) -->
+  <div class="card reveal" style="margin-bottom: 2.5rem; padding: 2rem;">
+    <div class="detail-grid">
+      
+      <!-- Gallery Column -->
+      <div>
+        <div class="pdp-stage wow-tilt">
+          <img id="main-product-img" src="{{ product.get_primary_image }}" alt="{{ product.name|tr:request.LANGUAGE_CODE }}">
+          {% if product.has_discount %}
+            <span class="product-card-badge" style="top: 1rem; inset-inline-end: 1rem; z-index: 2;">
+              <span class="badge-fire-icon">⚡</span>
+              <span>{{ product.calculate_discount_percent|num:request.LANGUAGE_CODE }}% {% tr 'Off' %}</span>
+            </span>
+          {% endif %}
+          <div style="position:absolute; bottom:0.9rem; inset-inline-start:50%; transform:translateX(50%); font-size:0.72rem; color:var(--text-muted); z-index:2;" class="hide-mobile">🔍 {% tr 'Click to enlarge' %}</div>
+        </div>
+
+        {% if images|length > 1 %}
+          <div class="pdp-thumbs" style="margin-top: 1rem;">
+            {% for img in images %}
+              <button class="pdp-thumb {% if forloop.first %}active{% endif %}" data-full="{{ img.image.url }}">
+                <img src="{{ img.image.url }}" alt="{{ product.name|tr:request.LANGUAGE_CODE }}">
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Details Column -->
+      <div>
+        <div class="flex justify-between items-center" style="margin-bottom: 0.5rem;">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">
+            {% tr 'Category:' %} <a href="{% url 'catalog:shop' %}?category={{ product.category.slug }}" style="color: var(--primary);">{{ product.category.name|tr:request.LANGUAGE_CODE }}</a>
+            {% if product.brand %} | {% tr 'Brand:' %} <a href="{% url 'catalog:shop' %}?brand={{ product.brand.slug }}" style="color: var(--primary);">{{ product.brand.name|tr:request.LANGUAGE_CODE }}</a>{% endif %}
+          </span>
+
+          <button onclick="toggleWishlist({{ product.id }}, this)" class="btn btn-outline btn-sm" style="display: flex; align-items: center; gap: 0.35rem;" title="{% tr 'Wishlist' %}">
+            <span class="wishlist-icon" style="color: #ef4444;">{% if is_in_wishlist %}♥{% else %}♡{% endif %}</span>
+            <span>{% tr 'Wishlist' %}</span>
+          </button>
+        </div>
+
+        <h1 style="font-size: 1.6rem; line-height: 1.4; margin-bottom: 0.75rem; font-weight: 900;">{{ product.name|tr:request.LANGUAGE_CODE }}</h1>
+
+        <!-- Rating summary & SKU -->
+        <div style="display: flex; align-items: center; gap: 1.25rem; font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.3rem;">
+            <span style="color: #f59e0b; font-size: 1.1rem;">★</span>
+            <span style="font-weight: 700; color: var(--text-primary);">{{ avg_rating|num:request.LANGUAGE_CODE }}</span>
+            <span>({{ review_count|num:request.LANGUAGE_CODE }} {% tr 'Customer Reviews' %})</span>
+          </div>
+          <div>{% tr 'SKU:' %} <span style="font-family: var(--font-mono); font-weight: 600; color: var(--text-primary);">{{ product.sku }}</span></div>
+        </div>
+
+        {% if product.short_description %}
+          <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; color: var(--text-secondary);">
+            {{ product.short_description }}
+          </p>
+        {% endif %}
+
+        <!-- Variants Selection -->
+        {% if variants %}
+          <div id="variant-picker" style="margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; background-color: var(--bg-subtle);">
+            <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 0.75rem;">{% tr 'Select Variant (Color / Storage / Size):' %}</div>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+              {% for v in variants %}
+                <label style="display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 1rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; background-color: var(--bg-surface);">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="radio" name="variant_choice" value="{{ v.id }}" {% if forloop.first %}checked{% endif %}>
+                    <span style="font-weight: 600; font-size: 0.9rem;">{{ v.name|tr:request.LANGUAGE_CODE }}</span>
+                  </div>
+                  <div style="font-size: 0.88rem; font-weight: 700; color: var(--primary);">
+                    {{ v.get_price|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Price Display Box -->
+        <div class="pc-badges">{% for kind, label in product.marketing_badges %}<span class="badge badge-market badge-{{ kind }}">{{ label|tr:request.LANGUAGE_CODE }}</span>{% endfor %}</div>
+            <div class="pdp-buy" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+          <div class="flex justify-between items-center">
+            <div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">{% tr 'Your Price:' %}</div>
+              <div id="product-price-display" style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">
+                {{ product.get_effective_price|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}
+              </div>
+              {% if product.has_discount %}
+                <div style="font-size: 0.9rem; color: var(--text-muted); text-decoration: line-through;">
+                  {{ product.base_price|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div>
+              {% if product.is_in_stock %}
+                <span id="product-stock-display" style="display: inline-block; padding: 0.35rem 0.85rem; border-radius: var(--radius-full); background-color: var(--success-light); color: var(--success); font-weight: 700; font-size: 0.88rem;">
+                  ✓ {% tr 'In Stock' %} ({{ product.stock|num:request.LANGUAGE_CODE }})
+                </span>
+              {% else %}
+                <span id="product-stock-display" style="display: inline-block; padding: 0.35rem 0.85rem; border-radius: var(--radius-full); background-color: var(--danger-light); color: var(--danger); font-weight: 700; font-size: 0.88rem;">
+                  ✕ {% tr 'Out of Stock' %}
+                </span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Add to Cart Form -->
+        {% if product.is_in_stock %}
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="ag-qty" style="display: flex; align-items: center; height: 48px;">
+              <button onclick="let q=document.getElementById('product-qty'); if(q.value>1)q.value--;" style="border:none; background:none; width: 36px; height: 100%; cursor: pointer; font-size: 1.1rem;">-</button>
+              <input type="number" id="product-qty" value="1" min="1" max="{{ product.stock }}" style="width: 45px; text-align: center; border: none; font-weight: 700; -moz-appearance: textfield;">
+              <button onclick="let q=document.getElementById('product-qty'); q.value++;" style="border:none; background:none; width: 36px; height: 100%; cursor: pointer; font-size: 1.1rem;">+</button>
+            </div>
+
+            <input type="hidden" id="selected-variant-id" value="{% if variants %}{{ variants.first.id }}{% endif %}">
+
+            <button class="btn btn-primary btn-lg btn-shimmer" style="flex: 1; border-radius: var(--radius-md); font-weight: 800;" onclick="addToCart({{ product.id }}, document.getElementById('selected-variant-id').value || null, parseInt(document.getElementById('product-qty').value))">
+              🛒 {% tr 'Add to Cart' %}
+            </button>
+          </div>
+        {% endif %}
+
+        <!-- Trust Features -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1.75rem; border-top: 1px solid var(--border); padding-top: 1.25rem; font-size: 0.85rem; color: var(--text-secondary);">
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <span>🛡️</span> {% tr '7-Day Return Guarantee' %}
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <span>⚡</span> {% tr 'Express Delivery in Shortest Time' %}
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <span>🔒</span> {% tr 'Safe & Secure Payment' %}
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <span>📦</span> {% tr '100% Authenticity Guarantee' %}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Specifications & Detailed Description Tabs -->
+  <div class="card reveal" style="margin-bottom: 2.5rem; padding: 2rem;">
+    <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+      {% tr 'Specifications & Product Review' %}
+    </h2>
+
+    <div style="margin-bottom: 2rem;">
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem;">{% tr 'Product Overview:' %}</h3>
+      <div style="font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary);">
+        {{ product.description|linebreaks }}
+      </div>
+    </div>
+
+    {% if specifications %}
+      <div style="margin-bottom: 2rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">{% tr 'Technical Specifications:' %}</h3>
+        <div class="table-scroll">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+          <tbody>
+            {% for spec in specifications %}
+              <tr style="border-bottom: 1px solid var(--border); background-color: {% cycle 'var(--bg-subtle)' 'var(--bg-surface)' %};">
+                <td style="padding: 0.75rem 1rem; width: 220px; font-weight: 600; color: var(--text-secondary);">{{ spec.key|tr:request.LANGUAGE_CODE }}</td>
+                <td style="padding: 0.75rem 1rem; color: var(--text-primary);">{{ spec.value|tr:request.LANGUAGE_CODE }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Customer Reviews Section -->
+  <div class="card" style="margin-bottom: 2.5rem; padding: 2rem;">
+    <div class="flex justify-between items-center" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+      <h2 style="font-size: 1.35rem; font-weight: 800;">{% tr 'Customer Reviews' %} ({{ review_count|num:request.LANGUAGE_CODE }})</h2>
+      <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 1.1rem; font-weight: 700;">
+        <span style="color: #f59e0b;">★</span>
+        <span>{{ avg_rating|num:request.LANGUAGE_CODE }} {% tr 'out of 5' %}</span>
+      </div>
+    </div>
+
+    <!-- Submit Review Box -->
+    {% if user.is_authenticated %}
+      <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.5rem; background-color: var(--bg-subtle); margin-bottom: 2rem;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem;">{% tr 'Write a Review' %}</h3>
+        <form action="{% url 'reviews:submit_review' product.id %}" method="POST">
+          {% csrf_token %}
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+              <label class="form-label">{% tr 'Your Rating (1 to 5 stars):' %}</label>
+              <select name="rating" class="form-select">
+                <option value="5">{% tr '5 Stars - Excellent' %}</option>
+                <option value="4">{% tr '4 Stars - Good' %}</option>
+                <option value="3">{% tr '3 Stars - Average' %}</option>
+                <option value="2">{% tr '2 Stars - Poor' %}</option>
+                <option value="1">{% tr '1 Star - Very Poor' %}</option>
+              </select>
+            </div>
+            <div style="flex: 2; min-width: 250px;">
+              <label class="form-label">{% tr 'Review Title:' %}</label>
+              <input type="text" name="title" placeholder="{% if request.LANGUAGE_CODE == 'en' %}e.g., Outstanding build quality{% else %}مثلاً: کیفیت ساخت فوق‌العاده{% endif %}" class="form-input" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">{% tr 'Your Review:' %}</label>
+            <textarea name="comment" rows="3" class="form-input" placeholder="{% if request.LANGUAGE_CODE == 'en' %}Write your pros, cons, and experience...{% else %}نقاط قوت، نقاط ضعف و تجربه استفاده خود را بنویسید...{% endif %}" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">{% tr 'Submit Review' %}</button>
+        </form>
+      </div>
+    {% else %}
+      <div style="padding: 1.5rem; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-md); margin-bottom: 2rem;">
+        {% if request.LANGUAGE_CODE == 'en' %}
+          Please <a href="{% url 'accounts:login' %}?next={{ request.path }}" style="color: var(--primary); font-weight: 700;">sign in to your account</a> to submit a review and rating.
+        {% else %}
+          برای ثبت دیدگاه و امتیاز ابتدا باید <a href="{% url 'accounts:login' %}?next={{ request.path }}" style="color: var(--primary); font-weight: 700;">وارد حساب کاربری خود شوید</a>.
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- Reviews List -->
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+      {% for rev in reviews %}
+        <div style="border-bottom: 1px solid var(--border); padding-bottom: 1.25rem;">
+          <div class="flex justify-between items-center" style="margin-bottom: 0.35rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+              <span style="font-weight: 700; font-size: 0.95rem;">{{ rev.user.get_full_name }}</span>
+              {% if rev.is_verified_buyer %}
+                <span class="badge badge-success">✓ {% tr 'Verified Buyer' %}</span>
+              {% endif %}
+            </div>
+            <div style="color: #f59e0b; font-size: 0.95rem;">
+              {% if rev.rating == 5 %}★★★★★{% elif rev.rating == 4 %}★★★★☆{% elif rev.rating == 3 %}★★★☆☆{% elif rev.rating == 2 %}★★☆☆☆{% else %}★☆☆☆☆{% endif %}
+            </div>
+          </div>
+          <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem;">{{ rev.title }}</h4>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">{{ rev.comment }}</p>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.4rem;">{{ rev.created_at|date:"Y/m/d" }}</div>
+        </div>
+      {% empty %}
+        <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          {% tr 'No reviews yet. Be the first to review this product!' %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {% if related_products %}
+  <section style="margin-bottom: 3rem;">
+    <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 1.25rem;">{% tr 'Related & Recommended Products' %}</h2>
+    <div class="grid grid-cols-4">
+      {% for rel in related_products %}
+        <div class="product-card">
+          <a href="{{ rel.get_absolute_url }}" class="product-card-img-wrap">
+            <img src="{{ rel.get_primary_image }}" alt="{{ rel.name|tr:request.LANGUAGE_CODE }}" class="product-card-img" loading="lazy">
+          </a>
+          <div class="product-card-body">
+            <div class="pc-badges">{% for kind, label in product.marketing_badges %}<span class="badge badge-market badge-{{ kind }}">{{ label|tr:request.LANGUAGE_CODE }}</span>{% endfor %}</div>
+            
+            <a href="{{ rel.get_absolute_url }}" class="product-card-title">{{ rel.name|tr:request.LANGUAGE_CODE }}</a>
+            <div class="product-card-price-row">
+              <div class="price-current">{{ rel.get_effective_price|toman:request.LANGUAGE_CODE }} <small style="font-size: 0.75rem;">{% tr 'Currency Toman' %}</small></div>
+              <button class="btn btn-outline btn-sm" onclick="addToCart({{ rel.id }})">+ {% tr 'Add' %}</button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+
+<!-- Mobile Sticky Bottom CTA for Product Page -->
+{% if product.is_in_stock %}
+  <div class="sticky-buy-bar">
+    <div>
+      <div style="font-size: 0.72rem; color: var(--text-muted);">{% tr 'Product Price:' %}</div>
+      <div style="font-weight: 800; font-size: 1.05rem; color: var(--primary); white-space: nowrap;">{{ product.get_effective_price|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}</div>
+    </div>
+    <button class="btn btn-primary btn-shimmer" onclick="addToCart({{ product.id }}, document.getElementById('selected-variant-id').value || null, 1)">
+      🛒 {% tr 'Quick Buy' %}
+    </button>
+  </div>
+{% endif %}
+
+<!-- Schema.org Structured Data: Product -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ product.name }}",
+  "image": ["{{ request.scheme }}://{{ request.get_host }}{{ product.get_primary_image }}"],
+  "description": "{{ product.short_description|default:product.name }}",
+  "sku": "{{ product.sku }}",
+  {% if product.brand %}"brand": {"@type": "Brand", "name": "{{ product.brand.name }}"},{% endif %}
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "IRR",
+    "price": "{{ product.get_effective_price }}",
+    "availability": "{% if product.is_in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+  }
+}
+</script>
+
+<script>
+  window.PRODUCT_VARIANTS = {{ variants_json|safe }};
+</script>
+{% endblock %}

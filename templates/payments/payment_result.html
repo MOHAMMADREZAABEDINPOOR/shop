@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}نتیجه پرداخت سفارش | {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 620px; margin: 2.5rem auto;">
+
+  <div class="card" style="padding: 2.5rem; text-align: center;">
+    {% if payment.status == 'SUCCESSFUL' %}
+      <div style="width: 72px; height: 72px; border-radius: 50%; background-color: var(--success-light); color: var(--success); font-size: 2.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto;">
+        ✓
+      </div>
+      <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--success); margin-bottom: 0.5rem;">
+        پرداخت با موفقیت انجام شد!
+      </h1>
+      <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 2rem;">
+        سفارش شما با شماره <strong>{{ order.order_number }}</strong> ثبت گردید و جهت آماده‌سازی به واحد انبار ارسال شد.
+      </p>
+
+      <!-- Transaction Info Table -->
+      <div style="background-color: var(--bg-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; text-align: right; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+        <div class="flex justify-between">
+          <span style="color: var(--text-muted);">شماره سفارش:</span>
+          <strong>{{ order.order_number }}</strong>
+        </div>
+        <div class="flex justify-between">
+          <span style="color: var(--text-muted);">شماره پیگیری بانکی (RRN):</span>
+          <span style="font-family: var(--font-mono); font-weight: 700; color: var(--primary);">{{ payment.tracking_number }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span style="color: var(--text-muted);">شماره کارت پرداخت‌کننده:</span>
+          <span style="font-family: var(--font-mono);">{{ payment.card_pan_masked }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span style="color: var(--text-muted);">مبلغ پرداخت شده:</span>
+          <strong style="color: var(--success);">{{ payment.amount|toman }} تومان</strong>
+        </div>
+        <div class="flex justify-between">
+          <span style="color: var(--text-muted);">تاریخ و ساعت تراکنش:</span>
+          <span>{{ payment.verified_at|date:"Y/m/d - H:i" }}</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{% url 'accounts:order_detail' order.order_number %}" class="btn btn-primary btn-block">
+          مشاهده جزئیات سفارش
+        </a>
+        <a href="{% url 'core:home' %}" class="btn btn-outline btn-block">
+          بازگشت به صفحه اصلی
+        </a>
+      </div>
+
+    {% else %}
+      <div style="width: 72px; height: 72px; border-radius: 50%; background-color: var(--danger-light); color: var(--danger); font-size: 2.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto;">
+        ✕
+      </div>
+      <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--danger); margin-bottom: 0.5rem;">
+        {% if payment.status == 'CANCELLED' %}پرداخت توسط شما لغو شد{% else %}تراکنش پرداخت ناموفق بود{% endif %}
+      </h1>
+      <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 2rem;">
+        {{ payment.error_message|default:"ارتباط با درگاه بانکی برقرار نشد یا اطلاعات کارت صحیح نبوده است." }}
+      </p>
+
+      <div style="background-color: var(--bg-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; text-align: right; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+        <div class="flex justify-between">
+          <span style="color: var(--text-muted);">شماره سفارش:</span>
+          <strong>{{ order.order_number }}</strong>
+        </div>
+        <div class="flex justify-between">
+          <span style="color: var(--text-muted);">مبلغ فاکتور:</span>
+          <strong>{{ payment.amount|toman }} تومان</strong>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{% url 'payments:initiate' order.order_number %}" class="btn btn-primary btn-block">
+          تلاش مجدد برای پرداخت
+        </a>
+        <a href="{% url 'cart:detail' %}" class="btn btn-outline btn-block">
+          بازگشت به سبد خرید
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

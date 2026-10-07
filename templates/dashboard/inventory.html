@@ -1,0 +1,55 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load shop_filters %}
+
+{% block title %}مدیریت موجودی انبار | {{ site_settings.site_name }}{% endblock %}
+
+{% block dashboard_content %}
+  <div class="admin-topbar">
+    <h2 style="font-size: 1.25rem; font-weight: 800;"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-grid"/></svg> کنترل موجودی انبار</h2>
+    <a href="{% url 'dashboard:overview' %}" class="btn btn-outline btn-sm">← بازگشت به داشبورد</a>
+  </div>
+
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="table-wrap" style="border:none; border-radius:0;">
+      <table class="table-admin">
+        <thead>
+          <tr>
+            <th>نام کالا</th>
+            <th>SKU</th>
+            <th>دسته‌بندی</th>
+            <th>موجودی فعلی</th>
+            <th>تغییر موجودی</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+            <tr style="{% if p.stock == 0 %}background-color: var(--danger-light);{% elif p.stock <= 5 %}background-color: var(--warning-light);{% endif %}">
+              <td style="font-weight:600;">{{ p.name }}</td>
+              <td style="font-family:var(--font-mono); font-size:0.8rem;">{{ p.sku }}</td>
+              <td>{{ p.category.name }}</td>
+              <td>
+                {% if p.stock == 0 %}
+                  <span class="badge badge-danger">ناموجود (۰)</span>
+                {% elif p.stock <= 5 %}
+                  <span class="badge badge-warning">کمبود ({{ p.stock|fa_num }})</span>
+                {% else %}
+                  <span class="badge badge-success">{{ p.stock|fa_num }} عدد</span>
+                {% endif %}
+              </td>
+              <td>
+                <form method="POST" style="display:flex; gap:0.35rem; align-items:center;">
+                  {% csrf_token %}
+                  <input type="hidden" name="product_id" value="{{ p.id }}">
+                  <input type="number" name="stock" value="{{ p.stock }}" min="0" class="form-input" style="width:90px; padding:0.35rem 0.5rem;">
+                  <button type="submit" class="btn btn-outline btn-sm">ثبت</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">کالایی وجود ندارد.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

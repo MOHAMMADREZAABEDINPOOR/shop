@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}تاریخچه سفارشات | {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="profile-layout">
+    
+    <!-- Account Sidebar -->
+    <aside class="card" style="padding: 1.5rem;">
+      <nav style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.92rem;">
+        <a href="{% url 'accounts:profile' %}" class="nav-link">👤 مشخصات حساب</a>
+        {% if not user.is_staff %}<a href="{% url 'accounts:order_history' %}" class="nav-link active" style="font-weight: 700;">📦 سفارش‌های من</a>
+        <a href="{% url 'accounts:address_list' %}" class="nav-link">📍 آدرس‌های من</a>
+        <a href="{% url 'accounts:wishlist' %}" class="nav-link">♥ لیست علاقه‌مندی‌ها</a>{% endif %}
+        <a href="{% url 'accounts:change_password' %}" class="nav-link">🔐 تغییر رمز عبور</a>
+        <a href="{% url 'accounts:logout' %}" class="nav-link" style="color: var(--danger); margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">🚪 خروج از حساب</a>
+      </nav>
+    </aside>
+
+    <!-- Orders Table -->
+    <div class="card" style="padding: 1.75rem;">
+      <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+        تاریخچه و پیگیری سفارشات من
+      </h2>
+
+      {% if orders %}
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+          {% for order in orders %}
+            <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; background-color: var(--bg-surface);">
+              
+              <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <strong style="font-size: 1rem;">سفارش {{ order.order_number }}</strong>
+                  <span class="badge badge-primary">
+                    {{ order.get_status_display }}
+                  </span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                  ثبت در: {{ order.created_at|date:"Y/m/d ساعت H:i" }}
+                </div>
+              </div>
+
+              <!-- Snapshot Items preview -->
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem; margin-bottom: 1rem;">
+                {% for item in order.items.all %}
+                  <div class="flex justify-between" style="color: var(--text-secondary);">
+                    <span>• {{ item.product_name }}{% if item.variant_name %} ({{ item.variant_name }}){% endif %} × {{ item.quantity }}</span>
+                    <span>{{ item.total_price|toman }} تومان</span>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <div class="flex justify-between items-center" style="border-top: 1px solid var(--border); padding-top: 0.75rem; flex-wrap: wrap; gap: 0.75rem;">
+                <div>
+                  <span style="color: var(--text-muted); font-size: 0.85rem;">مبلغ فاکتور:</span>
+                  <strong style="font-size: 1.1rem; color: var(--primary); margin-inline-start: 0.35rem;">{{ order.grand_total|toman }} تومان</strong>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                  {% if order.status == 'AWAITING_PAYMENT' or order.status == 'PENDING' %}
+                    <a href="{% url 'payments:initiate' order.order_number %}" class="btn btn-primary btn-sm">
+                      پرداخت آنلاین سفارش
+                    </a>
+                  {% endif %}
+                  <a href="{% url 'accounts:order_detail' order.order_number %}" class="btn btn-outline btn-sm">
+                    مشاهده فاکتور و جزئیات کامل
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div style="text-align: center; color: var(--text-muted); padding: 4rem 1rem;">
+          <div style="font-size: 3rem; margin-bottom: 0.75rem;">📦</div>
+          <h3 style="margin-bottom: 0.5rem;">هنوز سفارشی ثبت نکرده‌اید!</h3>
+          <p style="margin-bottom: 1.5rem; font-size: 0.95rem;">کالاهای مورد نظر خود را سفارش دهید تا در این بخش پیگیری کنید.</p>
+          <a href="{% url 'catalog:shop' %}" class="btn btn-primary">ورود به فروشگاه</a>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

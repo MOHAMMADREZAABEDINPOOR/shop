@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}جزئیات سفارش {{ order.order_number }} | {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 960px; margin: 2rem auto;">
+
+  <!-- Breadcrumb -->
+  <nav style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+    <a href="{% url 'accounts:profile' %}">حساب کاربری</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <a href="{% url 'accounts:order_history' %}">سفارش‌ها</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <span style="color: var(--text-primary); font-weight: 600;">سفارش {{ order.order_number }}</span>
+  </nav>
+
+  <div class="card" style="padding: 2rem;">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center" style="border-bottom: 2px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.25rem;">
+          فاکتور سفارش {{ order.order_number }}
+        </h1>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">
+          زمان ثبت: {{ order.created_at|date:"Y/m/d ساعت H:i" }} | شیوه ارسال: {{ order.shipping_method }}
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="badge badge-primary" style="font-size: 0.9rem; padding: 0.4rem 1rem;">
+          وضعیت: {{ order.get_status_display }}
+        </span>
+
+        {% if order.can_be_cancelled %}
+          <form action="{% url 'orders:order_cancel' order.order_number %}" method="POST" onsubmit="return confirm('آیا از لغو این سفارش اطمینان دارید؟ موجودی کالاها به انبار بازگردانده خواهد شد.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);">
+              لغو سفارش
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if order.tracking_code %}
+      <div style="background-color: var(--primary-light); border: 1px solid var(--primary); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.92rem;">
+        <span>📦</span>
+        <div>کد رهگیری پستی مرسوله شما: <strong style="font-family: var(--font-mono); font-size: 1.1rem; color: var(--primary); margin-inline-start: 0.5rem;">{{ order.tracking_code }}</strong></div>
+      </div>
+    {% endif %}
+
+    <!-- Shipping Address Snapshot Box -->
+    <div style="background-color: var(--bg-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; font-size: 0.9rem; line-height: 1.7;">
+      <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);">📍 اطلاعات تحویل گیرنده:</h3>
+      <div>نام تحویل‌گیرنده: <strong>{{ order.shipping_name }}</strong> | تلفن: <strong>{{ order.shipping_phone }}</strong></div>
+      <div>نشانی کامل: {{ order.shipping_province }}، {{ order.shipping_city }} - {{ order.shipping_address_line }} (کد پستی: <span style="font-family: var(--font-mono);">{{ order.shipping_postal_code }}</span>)</div>
+      {% if order.customer_notes %}
+        <div style="margin-top: 0.5rem; color: var(--text-muted);">یادداشت خریدار: {{ order.customer_notes }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Items Snapshot Table -->
+    <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem;">اقلام خریداری شده:</h3>
+    <div class="table-scroll" style="margin-bottom: 2rem;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.92rem;">
+      <thead>
+        <tr style="border-bottom: 2px solid var(--border); text-align: right; color: var(--text-muted); font-size: 0.85rem;">
+          <th style="padding-bottom: 0.75rem;">نام کالا در زمان خرید</th>
+          <th style="padding-bottom: 0.75rem;">قیمت واحد</th>
+          <th style="padding-bottom: 0.75rem; text-align: center;">تعداد</th>
+          <th style="padding-bottom: 0.75rem; text-align: left;">مبلغ کل</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items.all %}
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding-block: 0.85rem;">
+              <div style="font-weight: 700; color: var(--text-primary);">{{ item.product_name }}</div>
+              {% if item.variant_name %}
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">تنوع: {{ item.variant_name }}</div>
+              {% endif %}
+            </td>
+            <td style="padding-block: 0.85rem;">{{ item.unit_price|toman }} تومان</td>
+            <td style="padding-block: 0.85rem; text-align: center;">{{ item.quantity }}</td>
+            <td style="padding-block: 0.85rem; text-align: left; font-weight: 700;">{{ item.total_price|toman }} تومان</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+
+    <!-- Financial Breakdown -->
+    <div style="display: flex; justify-content: flex-end;">
+      <div style="width: 320px; max-width: 100%; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.92rem;">
+        <div class="flex justify-between">
+          <span style="color: var(--text-secondary);">جمع اقلام فاکتور:</span>
+          <span>{{ order.subtotal|toman }} تومان</span>
+        </div>
+        {% if order.discount_amount > 0 %}
+          <div class="flex justify-between" style="color: var(--danger);">
+            <span>تخفیف:</span>
+            <span>-{{ order.discount_amount|toman }} تومان</span>
+          </div>
+        {% endif %}
+        <div class="flex justify-between">
+          <span style="color: var(--text-secondary);">هزینه ارسال:</span>
+          <span>{% if order.shipping_cost == 0 %}رایگان{% else %}{{ order.shipping_cost|toman }} تومان{% endif %}</span>
+        </div>
+        <div class="flex justify-between" style="border-top: 2px solid var(--border); padding-top: 0.75rem; font-weight: 800; font-size: 1.15rem; color: var(--primary);">
+          <span>مبلغ پرداختی کل:</span>
+          <span>{{ order.grand_total|toman }} تومان</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payments Audit Section -->
+    {% if order.payments.all %}
+      <div style="margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem;">تراکنش‌های ثبت‌شده برای این سفارش:</h4>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem;">
+          {% for p in order.payments.all %}
+            <div style="background-color: var(--bg-subtle); padding: 0.75rem 1rem; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <span>تراکنش: <strong style="font-family: var(--font-mono);">{{ p.tracking_number|default:p.transaction_id }}</strong></span>
+                <span style="margin-inline-start: 1rem; color: var(--text-muted);">درگاه: {{ p.gateway }}</span>
+              </div>
+              <div>
+                <span class="badge {% if p.status == 'SUCCESSFUL' %}badge-success{% else %}badge-danger{% endif %}">
+                  {{ p.get_status_display }}
+                </span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      {% if order.status == 'AWAITING_PAYMENT' or order.status == 'PENDING' %}
+        <a href="{% url 'payments:initiate' order.order_number %}" class="btn btn-primary">
+          💳 پرداخت آنلاین اکنون
+        </a>
+      {% endif %}
+      <a href="{% url 'accounts:order_history' %}" class="btn btn-outline">
+        ← بازگشت به سفارش‌ها
+      </a>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

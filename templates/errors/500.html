@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}خطای سرور (500) | {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 550px; margin: 4rem auto; text-align: center;">
+  <div class="card" style="padding: 3rem 2rem;">
+    <div style="font-size: 5rem; font-weight: 900; color: var(--warning); line-height: 1; margin-bottom: 1rem; font-family: var(--font-mono);">
+      500
+    </div>
+    <h1 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.75rem;">خطای غیرمنتظره در سرور!</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+      مشکلی در پردازش درخواست شما رخ داده است. کارشناسان ما به زودی این مشکل را بررسی خواهند کرد.
+    </p>
+    <a href="{% url 'core:home' %}" class="btn btn-primary btn-lg">
+      بازگشت به صفحه اصلی
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load shop_filters %}
+{% load static %}
+
+{% block title %}آمار و گزارش‌ها | پنل مدیریت{% endblock %}
+
+{% block dashboard_content %}
+<div class="flex justify-between items-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h2 style="font-size: 1.4rem; font-weight: 900;"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-star"/></svg> مرکز آمار و تحلیل کسب‌وکار</h2>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">روندهای فروش، قیف وضعیت سفارش‌ها و سهم دسته‌بندی‌ها</p>
+  </div>
+  <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+    <a href="?days=7" class="wow-chip {% if days == 7 %}wow-chip-active{% endif %}">۷ روز</a>
+    <a href="?days=30" class="wow-chip {% if days == 30 %}wow-chip-active{% endif %}">۳۰ روز</a>
+    <a href="?days=90" class="wow-chip {% if days == 90 %}wow-chip-active{% endif %}">۹۰ روز</a>
+    <a href="{% url 'dashboard:export_orders_csv' %}" class="btn btn-primary btn-sm btn-shimmer" style="margin-inline-start: 0.5rem;"><svg class="icon icon-lg" aria-hidden="true" style="transform:rotate(180deg)"><use href="#i-arrow-up"/></svg> خروجی CSV سفارش‌ها</a>
+  </div>
+</div>
+
+<!-- KPI Row -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+  <div class="card card-wow-hover" style="padding: 1.25rem;">
+    <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700;">درآمد {{ days }} روز اخیر</div>
+    <div style="font-size: 1.4rem; font-weight: 900; color: var(--primary); margin-top: 0.3rem;">{{ current_revenue|toman }} تومان</div>
+    {% if growth_percent is not None %}
+      <div style="font-size: 0.8rem; font-weight: 800; margin-top: 0.35rem; color: {% if growth_percent >= 0 %}var(--success){% else %}var(--danger){% endif %};">
+        {% if growth_percent >= 0 %}▲ رشد{% else %}▼ افت{% endif %} {{ growth_percent|floatformat:1 }}٪ نسبت به دوره قبل
+      </div>
+    {% endif %}
+  </div>
+  <div class="card card-wow-hover" style="padding: 1.25rem;">
+    <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700;">پرفروش‌ترین کالا</div>
+    <div style="font-size: 1rem; font-weight: 900; margin-top: 0.5rem; line-height: 1.6;">
+      {% for tp in top_products|slice:":1" %}{{ tp.product__name }} <span style="color: var(--success);">({{ tp.qty }} فروش)</span>{% empty %}—{% endfor %}
+    </div>
+  </div>
+  <div class="card card-wow-hover" style="padding: 1.25rem;">
+    <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700;">دسته‌بندی پول‌ساز</div>
+    <div style="font-size: 1rem; font-weight: 900; margin-top: 0.5rem; line-height: 1.6;">
+      {% for c in category_share|slice:":1" %}{{ c.product__category__name }} <span style="color: var(--primary);">({{ c.revenue|toman }} تومان)</span>{% empty %}—{% endfor %}
+    </div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+  <!-- Revenue trend chart -->
+  <div class="card" style="padding: 1.5rem;">
+    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem;">روند درآمد و تعداد سفارش روزانه</h3>
+    <canvas id="trendChart" height="220"></canvas>
+  </div>
+  <!-- Status donut -->
+  <div class="card" style="padding: 1.5rem;">
+    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem;">توزیع وضعیت سفارش‌ها</h3>
+    <canvas id="statusChart" height="220"></canvas>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 1.25rem;">
+  <!-- Category share -->
+  <div class="card" style="padding: 1.5rem;">
+    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem;">سهم دسته‌بندی‌ها از درآمد</h3>
+    <canvas id="categoryChart" height="220"></canvas>
+  </div>
+  <!-- Top products table -->
+  <div class="card" style="padding: 1.5rem;">
+    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem;">۸ کالای پرفروش (بر اساس درآمد)</h3>
+    <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+      <thead>
+        <tr style="color: var(--text-muted); text-align: right; border-bottom: 1px solid var(--border);">
+          <th style="padding: 0.5rem 0;">#</th>
+          <th style="padding: 0.5rem 0;">محصول</th>
+          <th style="padding: 0.5rem 0;">تعداد فروش</th>
+          <th style="padding: 0.5rem 0;">درآمد</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tp in top_products %}
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.55rem 0; font-weight: 800;">{{ forloop.counter }}</td>
+            <td style="padding: 0.55rem 0;">{{ tp.product__name|default:"حذف‌شده" }}</td>
+            <td style="padding: 0.55rem 0;">{{ tp.qty }}</td>
+            <td style="padding: 0.55rem 0; font-weight: 800; color: var(--primary);">{{ tp.revenue|toman }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" style="padding: 1rem; text-align: center; color: var(--text-muted);">داده‌ای در این بازه زمانی وجود ندارد.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="{% static 'vendor/chart.umd.min.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridColor = isDark ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.12)';
+  Chart.defaults.font.family = 'Vazirmatn, sans-serif';
+  Chart.defaults.color = isDark ? '#94a3b8' : '#64748b';
+
+  // Revenue & orders trend (dual axis)
+  new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: {{ trend_labels_json|safe }},
+      datasets: [
+        {
+          label: 'درآمد (تومان)',
+          data: {{ trend_revenue_json|safe }},
+          borderColor: '#D97706',
+          backgroundColor: (ctx) => {
+            const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 260);
+            g.addColorStop(0, 'rgba(217, 119, 6,0.35)');
+            g.addColorStop(1, 'rgba(217, 119, 6,0)');
+            return g;
+          },
+          fill: true,
+          tension: 0.4,
+          pointRadius: 2,
+          borderWidth: 2.5,
+          yAxisID: 'y'
+        },
+        {
+          label: 'تعداد سفارش',
+          data: {{ trend_orders_json|safe }},
+          borderColor: '#e0932f',
+          type: 'bar',
+          borderRadius: 6,
+          barPercentage: 0.5,
+          backgroundColor: 'rgba(224,147,47,0.35)',
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        y: { grid: { color: gridColor }, ticks: { callback: v => (v / 1000000) + 'م' } },
+        y1: { position: 'right', grid: { display: false } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Status donut
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ status_labels_json|safe }},
+      datasets: [{
+        data: {{ status_values_json|safe }},
+        backgroundColor: ['#D97706', '#e0932f', '#F59E0B', '#FFB224', '#FFD98A', '#f6c352', '#0d7a63', '#ef4444'],
+        borderWidth: 0
+      }]
+    },
+    options: { cutout: '62%', plugins: { legend: { position: 'bottom', rtl: true, labels: { boxWidth: 14, padding: 14 } } } }
+  });
+
+  // Category horizontal bar
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ category_labels_json|safe }},
+      datasets: [{
+        label: 'درآمد (تومان)',
+        data: {{ category_values_json|safe }},
+        backgroundColor: ['#D97706', '#F59E0B', '#FFB224', '#e0932f', '#FFD98A', '#0d7a63'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { color: gridColor }, ticks: { callback: v => (v / 1000000) + 'م' } } }
+    }
+  });
+});
+</script>
+{% endblock %}

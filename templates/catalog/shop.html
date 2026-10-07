@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}
+  {% if selected_category %}{{ selected_category.name|tr:request.LANGUAGE_CODE }} | {% elif selected_brand %}{{ selected_brand.name|tr:request.LANGUAGE_CODE }} | {% elif q %}{% if request.LANGUAGE_CODE == 'en' %}Search for "{{ q }}"{% else %}جستجوی «{{ q }}»{% endif %} | {% endif %}{{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:"Shop" }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Breadcrumb -->
+  <nav style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+    <a href="{% url 'core:home' %}">{% tr 'Home' %}</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <a href="{% url 'catalog:shop' %}">{% tr 'Shop' %}</a>
+    {% if selected_category %}
+      <span style="margin-inline: 0.5rem;">/</span>
+      <span style="color: var(--text-primary); font-weight: 600;">{{ selected_category.name|tr:request.LANGUAGE_CODE }}</span>
+    {% elif selected_brand %}
+      <span style="margin-inline: 0.5rem;">/</span>
+      <span style="color: var(--text-primary); font-weight: 600;">{% tr 'Brand' %} {{ selected_brand.name|tr:request.LANGUAGE_CODE }}</span>
+    {% elif q %}
+      <span style="margin-inline: 0.5rem;">/</span>
+      <span style="color: var(--text-primary); font-weight: 600;">{% tr 'Search:' %} {{ q }}</span>
+    {% endif %}
+  </nav>
+
+  <!-- سرتیتر ویرایشی صفحه فروشگاه -->
+  <header class="wow-page-head reveal" style="margin-bottom: 1.75rem;">
+    <span class="section-eyebrow" style="display: inline-block; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.14em; color: var(--primary); margin-bottom: 0.35rem;">{% tr 'Product Catalog' %}</span>
+    <h1 style="font-size: clamp(1.6rem, 3.4vw, 2.4rem); font-weight: 900; letter-spacing: -0.02em; margin: 0;">
+      {% if selected_category %}{{ selected_category.name|tr:request.LANGUAGE_CODE }}{% elif selected_brand %}{% tr 'Products of Brand' %} {{ selected_brand.name|tr:request.LANGUAGE_CODE }}{% elif q %}{% tr 'Search Results for' %} «{{ q }}»{% else %}{% tr 'Product Catalog' %}{% endif %}
+    </h1>
+  </header>
+
+  <div class="shop-layout">
+
+    <!-- Filters Sidebar -->
+    <aside class="card" style="position: sticky; top: 90px;">
+      <div class="flex justify-between items-center" style="margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 700;">{% tr 'Filter Products' %}</h3>
+        <a href="{% url 'catalog:shop' %}" style="font-size: 0.8rem; color: var(--primary);">{% tr 'Clear All' %}</a>
+      </div>
+
+      <form action="{% url 'catalog:shop' %}" method="GET" id="shop-filter-form">
+        {% if q %}
+          <input type="hidden" name="q" value="{{ q }}">
+        {% endif %}
+        {% if sort %}
+          <input type="hidden" name="sort" value="{{ sort }}">
+        {% endif %}
+
+        <!-- Categories Filter -->
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">{% tr 'Categories' %}</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.88rem; max-height: 200px; overflow-y: auto;">
+            <li>
+              <a href="{% url 'catalog:shop' %}{% if q %}?q={{ q }}{% endif %}" style="color: {% if not selected_category %}var(--primary); font-weight: 700;{% else %}var(--text-secondary);{% endif %}">
+                {% tr 'All Categories' %}
+              </a>
+            </li>
+            {% for cat in categories %}
+              <li>
+                <a href="{% url 'catalog:shop' %}?category={{ cat.slug }}{% if q %}&q={{ q }}{% endif %}" style="display: flex; justify-content: space-between; color: {% if selected_category.id == cat.id %}var(--primary); font-weight: 700;{% else %}var(--text-secondary);{% endif %}">
+                  <span>{{ cat.name|tr:request.LANGUAGE_CODE }}</span>
+                </a>
+                {% if cat.children.all %}
+                  <ul style="list-style: none; padding-inline-start: 1rem; margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                    {% for subcat in cat.children.all %}
+                      <li>
+                        <a href="{% url 'catalog:shop' %}?category={{ subcat.slug }}{% if q %}&q={{ q }}{% endif %}" style="color: {% if selected_category.id == subcat.id %}var(--primary); font-weight: 700;{% else %}var(--text-muted);{% endif %} font-size: 0.82rem;">
+                          ↳ {{ subcat.name|tr:request.LANGUAGE_CODE }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Brands Filter (multi-select) -->
+        <div style="margin-bottom: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">{% tr 'Brands' %}</h4>
+          {% if brands|length > 6 %}
+          <select name="brand" class="form-select" onchange="this.form.submit()" style="font-size: 0.88rem; padding: 0.5rem; margin-bottom: 0.6rem;">
+            <option value="">{% tr 'All Brands' %}</option>
+            {% for b in brands %}
+              <option value="{{ b.slug }}" {% if selected_brand.slug == b.slug %}selected{% endif %}>{{ b.name|tr:request.LANGUAGE_CODE }}</option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <div class="wow-chip-group">
+            {% for b in brands %}
+              <label>
+                <input type="checkbox" name="brands" value="{{ b.slug }}" class="form-checkbox" style="display:none;"
+                       data-wow-filter-submit {% if b.slug in selected_brands %}checked{% endif %}>
+                <span class="wow-chip {% if b.slug in selected_brands %}wow-chip-active{% endif %}">{{ b.name|tr:request.LANGUAGE_CODE }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Minimum Rating Filter -->
+        <div style="margin-bottom: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">{% tr 'Minimum Rating' %}</h4>
+          <div class="wow-chip-group">
+            <a href="?{% if selected_category %}category={{ selected_category.slug }}&{% endif %}{% if q %}q={{ q }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}{% if selected_brands %}brands={{ selected_brands|join:',' }}&{% endif %}{% if in_stock %}in_stock=1&{% endif %}{% if discount_only %}discount=1{% endif %}"
+               class="wow-chip {% if not min_rating %}wow-chip-active{% endif %}">{% tr 'All' %}</a>
+            {% for r in '34' %}
+              <a href="?{% if selected_category %}category={{ selected_category.slug }}&{% endif %}{% if q %}q={{ q }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}{% if selected_brands %}brands={{ selected_brands|join:',' }}&{% endif %}{% if in_stock %}in_stock=1&{% endif %}{% if discount_only %}discount=1&{% endif %}min_rating={{ r }}"
+                 class="wow-chip {% if min_rating == r|add:'.0' or min_rating == r %}wow-chip-active{% endif %}">★ {{ r|num:request.LANGUAGE_CODE }} {% tr '& Up' %}</a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Availability Toggle -->
+        <div style="margin-bottom: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; cursor: pointer;">
+            <input type="checkbox" name="in_stock" value="1" {% if in_stock %}checked{% endif %} onchange="this.form.submit()" class="form-checkbox">
+            <span>{% tr 'In-Stock Only' %}</span>
+          </label>
+        </div>
+
+        <!-- Discount Toggle -->
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; cursor: pointer;">
+            <input type="checkbox" name="discount" value="1" {% if discount_only %}checked{% endif %} onchange="this.form.submit()" class="form-checkbox">
+            <span style="color: var(--danger); font-weight: 600;">{% tr 'On Sale Only' %} 🔥</span>
+          </label>
+        </div>
+
+        <!-- Price Range Filter (dual slider) -->
+        <div style="border-top: 1px solid var(--border); padding-top: 1rem;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">{% tr 'Price Range (Toman)' %}</h4>
+          <div class="wow-range-wrap" data-wow-range-wrap data-wow-targets="[data-wow-sync-price]">
+            <div class="wow-range-track"></div>
+            <div class="wow-range-fill"></div>
+            <input type="range" data-wow-range="min" min="{{ price_lower_bound }}" max="{{ price_upper_bound }}" step="50000" value="{{ min_price|default:price_lower_bound }}">
+            <input type="range" data-wow-range="max" min="{{ price_lower_bound }}" max="{{ price_upper_bound }}" step="50000" value="{{ max_price|default:price_upper_bound }}">
+          </div>
+          <div data-wow-range-out style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.6rem; text-align: center;"></div>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+            <input type="number" name="min_price" value="{{ min_price }}" placeholder="{% tr 'From' %}" data-wow-sync-price class="form-input" style="font-size: 0.82rem; padding: 0.45rem;">
+            <input type="number" name="max_price" value="{{ max_price }}" placeholder="{% tr 'To' %}" data-wow-sync-price class="form-input" style="font-size: 0.82rem; padding: 0.45rem;">
+          </div>
+          <button type="submit" class="btn btn-outline btn-sm btn-block">{% tr 'Apply Price Filter' %}</button>
+        </div>
+      </form>
+    </aside>
+
+    <!-- Main Content: Catalog Grid -->
+    <div>
+      
+      <!-- Top Bar: Results Count & Sort Dropdown -->
+      <div class="card" style="padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div style="font-size: 0.9rem; color: var(--text-secondary);">
+          {% if request.LANGUAGE_CODE == 'en' %}
+            Showing <strong>{{ total_count|num:request.LANGUAGE_CODE }}</strong> products{% if q %} for "{{ q }}"{% endif %}
+          {% else %}
+            نمایش <strong>{{ total_count|num:request.LANGUAGE_CODE }}</strong> کالا{% if q %} برای عبارت «{{ q }}»{% endif %}
+          {% endif %}
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 0.88rem; color: var(--text-muted);">{% tr 'Sort by:' %}</span>
+          <select class="form-select" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.88rem;" onchange="location = this.value;">
+            <option value="?{% if q %}q={{ q }}&{% endif %}{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort=newest" {% if sort == 'newest' %}selected{% endif %}>{% tr 'Newest' %}</option>
+            <option value="?{% if q %}q={{ q }}&{% endif %}{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort=price_low" {% if sort == 'price_low' %}selected{% endif %}>{% tr 'Price: Low to High' %}</option>
+            <option value="?{% if q %}q={{ q }}&{% endif %}{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort=price_high" {% if sort == 'price_high' %}selected{% endif %}>{% tr 'Price: High to Low' %}</option>
+            <option value="?{% if q %}q={{ q }}&{% endif %}{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort=discount" {% if sort == 'discount' %}selected{% endif %}>{% tr 'Biggest Discount' %}</option>
+            <option value="?{% if q %}q={{ q }}&{% endif %}{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort=rating" {% if sort == 'rating' %}selected{% endif %}>{% tr 'Highest Rated' %}</option>
+            <option value="?{% if q %}q={{ q }}&{% endif %}{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort=popular" {% if sort == 'popular' or sort == 'bestseller' %}selected{% endif %}>{% tr 'Best Selling' %}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-3">
+        {% for product in products %}
+          <div class="product-card">
+            <a href="{{ product.get_absolute_url }}" class="product-card-img-wrap">
+              <img src="{{ product.get_primary_image }}" alt="{{ product.name }}" class="product-card-img" loading="lazy">
+              {% if product.has_discount %}
+                <span class="product-card-badge">
+                  <span class="badge-fire-icon">⚡</span>
+                  <span>{{ product.calculate_discount_percent|num:request.LANGUAGE_CODE }}% {% tr 'Off' %}</span>
+                </span>
+              {% endif %}
+
+              <!-- Quick Action Floating Buttons -->
+              <div class="product-card-actions">
+                <button class="product-card-action-btn" title="{% tr 'Quick Buy' %}" onclick="event.preventDefault(); addToCart({{ product.id }});">
+                  🛒
+                </button>
+                <button class="product-card-action-btn" title="{% tr 'Wishlist' %}" onclick="event.preventDefault(); toggleWishlist({{ product.id }}, this);">
+                  ♥
+                </button>
+              </div>
+            </a>
+
+            <div class="product-card-body">
+            <div class="pc-badges">{% for kind, label in product.marketing_badges %}<span class="badge badge-market badge-{{ kind }}">{{ label|tr:request.LANGUAGE_CODE }}</span>{% endfor %}</div>
+            
+              <div class="flex justify-between items-center" style="margin-bottom: 0.2rem;">
+                <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">{{ product.category.name|tr:request.LANGUAGE_CODE }}</span>
+                <div class="rating-star-interactive" style="font-size: 0.8rem;">
+                  <span>★</span>
+                  <span style="font-weight: 700; color: var(--text-primary);">{{ product.get_average_rating|default:"5.0"|num:request.LANGUAGE_CODE }}</span>
+                </div>
+              </div>
+
+              <a href="{{ product.get_absolute_url }}" class="product-card-title" title="{{ product.name|tr:request.LANGUAGE_CODE }}">{{ product.name|tr:request.LANGUAGE_CODE }}</a>
+              
+              <div class="product-card-price-row">
+                <div>
+                  {% if product.has_discount %}
+                    <div class="price-old">{{ product.base_price|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}</div>
+                  {% endif %}
+                  <div class="price-current">
+                    {{ product.get_effective_price|toman:request.LANGUAGE_CODE }} <small style="font-size: 0.78rem; font-weight: normal; color: var(--text-secondary);">{% tr 'Currency Toman' %}</small>
+                  </div>
+                </div>
+
+                {% if product.is_in_stock %}
+                  <button class="btn btn-primary btn-sm btn-shimmer" onclick="addToCart({{ product.id }})" style="border-radius: var(--radius-full); padding: 0.4rem 0.9rem;">
+                    + {% tr 'Add' %}
+                  </button>
+                {% else %}
+                  <span class="badge badge-danger" style="font-size: 0.75rem;">{% tr 'Out of Stock' %}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+            <h3 style="margin-bottom: 0.5rem;">{% tr 'No products match your selected filters.' %}</h3>
+            <p style="margin-bottom: 1.5rem; font-size: 0.95rem;">{% tr 'Please try different keywords or adjust your filter criteria.' %}</p>
+            <a href="{% url 'catalog:shop' %}" class="btn btn-primary">{% tr 'View All Products' %}</a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- High-Volume Pagination Controls -->
+      {% if page_obj.has_other_pages %}
+        <div style="display: flex; justify-content: center; align-items: center; gap: 0.4rem; margin-top: 2.5rem; flex-wrap: wrap;">
+          {% if page_obj.has_previous %}
+            <a href="?page=1{% if q %}&q={{ q }}{% endif %}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if selected_brand %}&brand={{ selected_brand.slug }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if in_stock %}&in_stock=1{% endif %}{% if discount_only %}&discount=1{% endif %}" class="btn btn-outline btn-sm">« {% tr 'First' %}</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if selected_brand %}&brand={{ selected_brand.slug }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if in_stock %}&in_stock=1{% endif %}{% if discount_only %}&discount=1{% endif %}" class="btn btn-outline btn-sm">{% tr 'Previous' %}</a>
+          {% endif %}
+
+          {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+              <span class="btn btn-primary btn-sm" style="font-weight: 800; min-width: 36px;">{{ num|num:request.LANGUAGE_CODE }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <a href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if selected_brand %}&brand={{ selected_brand.slug }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if in_stock %}&in_stock=1{% endif %}{% if discount_only %}&discount=1{% endif %}" class="btn btn-outline btn-sm" style="min-width: 36px;">{{ num|num:request.LANGUAGE_CODE }}</a>
+            {% endif %}
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if selected_brand %}&brand={{ selected_brand.slug }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if in_stock %}&in_stock=1{% endif %}{% if discount_only %}&discount=1{% endif %}" class="btn btn-outline btn-sm">{% tr 'Next' %}</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if selected_brand %}&brand={{ selected_brand.slug }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if in_stock %}&in_stock=1{% endif %}{% if discount_only %}&discount=1{% endif %}" class="btn btn-outline btn-sm">{% tr 'Last' %} »</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

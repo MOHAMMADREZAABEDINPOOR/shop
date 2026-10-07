@@ -1,0 +1,524 @@
+{% load static shop_filters %}
+<!DOCTYPE html>
+<html lang="{{ request.LANGUAGE_CODE|default:'en' }}" dir="{% if request.LANGUAGE_CODE == 'fa' %}rtl{% else %}ltr{% endif %}" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#08080A" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#F4F4F6" media="(prefers-color-scheme: light)">
+  <script>
+    /* apply theme before first paint */
+    (function () {
+      try {
+        var t = null;
+        var q = new URLSearchParams(window.location.search).get('theme');
+        if (q === 'dark' || q === 'light') t = q;
+        if (!t) t = localStorage.getItem('theme');
+        if (t !== 'dark' && t !== 'light') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <title>{% block title %}{{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:"Shop" }} | {{ site_settings.site_tagline|tr:request.LANGUAGE_CODE }}{% endblock %}</title>
+
+  <meta name="description" content="{% block meta_description %}{{ site_settings.site_tagline|tr:request.LANGUAGE_CODE }}{% endblock %}">
+  <link rel="canonical" href="{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}">
+
+  <!-- Open Graph / Social SEO -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{% block og_title %}{{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:'Shop' }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ site_settings.site_tagline|tr:request.LANGUAGE_CODE }}{% endblock %}">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta property="og:site_name" content="{{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:'Shop' }}">
+  <meta property="og:locale" content="{% if request.LANGUAGE_CODE == 'fa' %}fa_IR{% else %}en_US{% endif %}">
+  <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-cover.jpg' %}{% endblock %}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}{{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:'Shop' }}{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}{{ site_settings.site_tagline|tr:request.LANGUAGE_CODE }}{% endblock %}">
+  <meta name="twitter:image" content="{% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-cover.jpg' %}{% endblock %}">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+
+  <!-- Self-hosted fonts -->
+  <link rel="preload" as="font" type="font/woff2" href="{% static 'fonts/Vazirmatn-UI-FD-Regular.woff2' %}" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="{% static 'fonts/NotoKufiArabic-800.woff2' %}" crossorigin>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+  <link rel="stylesheet" href="{% static 'css/wow.css' %}">
+  <link rel="stylesheet" href="{% static 'css/premium.css' %}">
+  <link rel="stylesheet" href="{% static 'css/stage.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <a href="#main-content" class="sr-skip">{% tr 'Skip to main content' %}</a>
+
+  <!-- SVG icon sprite -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+    <symbol id="i-arrow-start" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 11.5 11.5 14 15.5 9.5"/></symbol>
+    <symbol id="i-returns" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+    <symbol id="i-headset" viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-instagram" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2c.7 4.5 3.5 7.3 8 8-4.5.7-7.3 3.5-8 8-.7-4.5-3.5-7.3-8-8 4.5-.7 7.3-3.5 8-8z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  </svg>
+
+  <!-- Top Announcement Bar & CTA & Language Switcher -->
+  <div class="site-announce" style="font-size: 0.82rem; padding-block: 0.5rem; text-align: center; font-weight: 700; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);">
+    <div class="container flex justify-between items-center" style="padding-inline: 1rem; gap: 1rem; flex-wrap: wrap; justify-content: space-between;">
+      <a href="{% url 'catalog:shop' %}" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.5rem;">
+        <span class="badge badge-primary" style="font-size: 0.72rem;">{% tr 'Special Offers' %}</span>
+        <span>{% tr 'Top Deals CTA' %}</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <!-- Language Switcher -->
+        <div class="lang-switch-box" style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 6px;">
+          <a href="{% url 'core:set_language_direct' 'en' %}" style="text-decoration: none; color: inherit; padding: 2px 6px; border-radius: 4px; {% if request.LANGUAGE_CODE != 'fa' %}background: var(--primary); color: #fff; font-weight: 700;{% endif %}">EN</a>
+          <span>|</span>
+          <a href="{% url 'core:set_language_direct' 'fa' %}" style="text-decoration: none; color: inherit; padding: 2px 6px; border-radius: 4px; {% if request.LANGUAGE_CODE == 'fa' %}background: var(--primary); color: #fff; font-weight: 700;{% endif %}">فا</a>
+        </div>
+        <div style="display: flex; gap: 1rem;" class="hide-mobile">
+          <span><svg class="icon" style="vertical-align:-0.2em"><use href="#i-phone"/></svg> {% tr 'Support Phone' %}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-top">
+
+        <!-- Logo -->
+        <a href="{% url 'core:home' %}" class="brand-logo" aria-label="{{ site_settings.site_name|tr:request.LANGUAGE_CODE }}">
+          <span class="em-mark"><svg aria-hidden="true"><use href="#i-spark"/></svg></span>
+          <span>{{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:"Shop" }}</span>
+        </a>
+
+        <!-- Live Search Box -->
+        <div class="search-container">
+          <form action="{% url 'catalog:shop' %}" method="GET" role="search">
+            <div class="search-input-wrapper">
+              <svg class="search-icon" aria-hidden="true"><use href="#i-search"/></svg>
+              <input type="search" id="main-search-input" name="q" value="{{ request.GET.q|default:'' }}" class="search-input" placeholder="{% tr 'Search in thousands of products...' %}" autocomplete="off" aria-label="Search">
+            </div>
+          </form>
+          <div id="search-dropdown" class="search-dropdown"></div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="header-actions">
+          <!-- Dark/Light Theme Toggle -->
+          <button id="theme-toggle-btn" class="action-btn" aria-label="Toggle theme" title="Theme">
+            <svg id="theme-icon-moon" class="icon icon-lg" aria-hidden="true"><use href="#i-moon"/></svg>
+            <svg id="theme-icon-sun" class="icon icon-lg" style="display: none;" aria-hidden="true"><use href="#i-sun"/></svg>
+          </button>
+
+          {% if user.is_authenticated %}
+            {% if not user.is_staff %}<a href="{% url 'accounts:wishlist' %}" class="action-btn" title="{% tr 'Wishlist' %}" aria-label="{% tr 'Wishlist' %}">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-heart"/></svg>
+            </a>{% endif %}
+            <div style="position: relative; display: inline-block;" class="hide-mobile">
+              <a href="{% url 'accounts:profile' %}" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 0.45rem;">
+                <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
+                <span>{{ user.get_short_name }}</span>
+              </a>
+            </div>
+            {% if user.is_staff or user.is_superuser %}
+              <a href="{% url 'dashboard:overview' %}" class="btn btn-primary btn-sm hide-mobile" title="{% tr 'Dashboard' %}">
+                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
+                {% tr 'Dashboard' %}
+              </a>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline btn-sm hide-mobile">
+              <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
+              {% tr 'Login / Register' %}
+            </a>
+          {% endif %}
+
+          {% if not user.is_staff %}<!-- Cart Drawer Button -->
+          <a href="{% url 'cart:detail' %}" class="action-btn toggle-cart-drawer" title="{% tr 'Cart' %}" aria-label="{% tr 'Cart' %}">
+            <svg class="icon icon-lg" aria-hidden="true"><use href="#i-cart"/></svg>
+            <span class="action-badge cart-badge-count" style="{% if cart_item_count == 0 %}display:none;{% endif %}">{{ cart_item_count }}</span>
+          </a>{% endif %}
+
+          <!-- Mobile Menu Button -->
+          <button id="em-burger" class="action-btn em-burger" aria-label="Menu" aria-expanded="false" aria-controls="em-mobile-menu">
+            <svg class="icon icon-lg" aria-hidden="true"><use href="#i-menu"/></svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Navigation Bar -->
+      <nav class="navbar" aria-label="Main Navigation">
+        <a href="{% url 'core:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">{% tr 'Home' %}</a>
+        <a href="{% url 'catalog:shop' %}" class="nav-link {% if request.resolver_match.url_name == 'shop' and not request.GET.category and not request.GET.discount %}active{% endif %}">{% tr 'All Products' %}</a>
+
+        <div class="nav-item-mega">
+          <a href="{% url 'catalog:shop' %}" class="nav-link" aria-haspopup="true">
+            {% tr 'Categories' %}
+            <svg class="icon" style="width:0.9em;height:0.9em" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+          </a>
+          {% if nav_categories %}
+          <div class="em-mega" role="menu">
+            {% for cat in nav_categories %}
+              <div class="em-mega-col">
+                <h5><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg> {{ cat.name|tr:request.LANGUAGE_CODE }}</h5>
+                {% for sub in cat.children.all %}
+                  {% if sub.is_active %}
+                    <a href="{% url 'catalog:shop' %}?category={{ sub.slug }}">{{ sub.name|tr:request.LANGUAGE_CODE }}</a>
+                  {% endif %}
+                {% endfor %}
+                <a href="{% url 'catalog:shop' %}?category={{ cat.slug }}" style="color: var(--primary); font-weight: 800;">{% tr 'View All' %}</a>
+              </div>
+            {% endfor %}
+            <div class="em-mega-foot">
+              <span>{% tr 'Fast shipping, authenticity guarantee & 7-day returns' %}</span>
+              <a href="{% url 'catalog:shop' %}?discount=1" style="color: var(--accent); font-weight: 800;">{% tr 'Special Offers' %} ←</a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <a href="{% url 'catalog:shop' %}?discount=1" class="nav-link accent-link">
+          <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>
+          {% tr 'Special Offer' %}
+        </a>
+        <a href="{% url 'core:about' %}" class="nav-link">{% tr 'About Us' %}</a>
+        <a href="{% url 'core:contact' %}" class="nav-link">{% tr 'Contact Us' %}</a>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div id="em-mobile-menu" class="em-mobile-menu" aria-hidden="false">
+    <div class="emm-backdrop"></div>
+    <div class="emm-panel" role="dialog" aria-label="{% tr 'Menu' %}">
+      <div class="emm-head">
+        <span class="brand-logo" style="font-size:1.05rem"><span class="em-mark" style="width:34px;height:34px;border-radius:11px"><svg aria-hidden="true" style="width:18px;height:18px"><use href="#i-spark"/></svg></span> {{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:"Shop" }}</span>
+        <button class="action-btn" data-emm-close aria-label="{% tr 'Close' %}"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-close"/></svg></button>
+      </div>
+      <form action="{% url 'catalog:shop' %}" method="GET" role="search" style="margin-bottom:0.9rem">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" aria-hidden="true"><use href="#i-search"/></svg>
+          <input type="search" name="q" class="search-input" placeholder="{% tr 'Search in thousands of products...' %}" aria-label="Search">
+        </div>
+      </form>
+      <div class="emm-links">
+        <a href="{% url 'core:home' %}">{% tr 'Home' %}</a>
+        <a href="{% url 'catalog:shop' %}">{% tr 'All Products' %}</a>
+        <a href="{% url 'catalog:shop' %}?discount=1" style="color: var(--accent)">{% tr 'Special Offer' %}</a>
+        {% for cat in nav_categories %}
+          <a href="{% url 'catalog:shop' %}?category={{ cat.slug }}">{{ cat.name|tr:request.LANGUAGE_CODE }}</a>
+          <div class="emm-sub">
+            {% for sub in cat.children.all %}
+              {% if sub.is_active %}
+                <a href="{% url 'catalog:shop' %}?category={{ sub.slug }}">{{ sub.name|tr:request.LANGUAGE_CODE }}</a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <a href="{% url 'core:about' %}">{% tr 'About Us' %}</a>
+        <a href="{% url 'core:contact' %}">{% tr 'Contact Us' %}</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:profile' %}">{% tr 'My Account' %}</a>
+        {% else %}
+          <a href="{% url 'accounts:login' %}">{% tr 'Login / Register' %}</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container & Django Messages -->
+  <div class="toast-container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="toast toast-{{ message.tags|default:'info' }}">
+          <svg class="icon icon-lg" aria-hidden="true">
+            {% if message.tags == 'success' %}<use href="#i-check-circle"/>
+            {% elif message.tags == 'danger' or message.tags == 'error' %}<use href="#i-alert"/>
+            {% else %}<use href="#i-info"/>{% endif %}
+          </svg>
+          <div style="flex: 1; font-size: 0.92rem;">{{ message }}</div>
+          <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);" onclick="this.parentElement.remove()" aria-label="{% tr 'Close' %}">×</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Mini-Cart Drawer -->
+  <div id="cart-drawer-overlay" class="cart-drawer-overlay">
+    <div class="cart-drawer" onclick="event.stopPropagation()">
+      <div class="cart-drawer-header">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div class="cart-drawer-header-icon">
+            <svg class="icon" aria-hidden="true"><use href="#i-cart"/></svg>
+          </div>
+          <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0;">{% tr 'Your Shopping Cart' %}</h3>
+          <span id="cart-drawer-badge" class="badge badge-primary badge-subtle" style="font-size: 0.72rem; padding: 0.15rem 0.5rem; display: none;">0</span>
+        </div>
+        <button id="cart-drawer-close" class="cart-drawer-close-btn" aria-label="{% tr 'Close' %}">
+          <svg class="icon" aria-hidden="true" style="width: 1.1rem; height: 1.1rem;"><use href="#i-close"/></svg>
+        </button>
+      </div>
+      <div id="cart-drawer-items" class="cart-drawer-body">
+        <!-- Dynamically loaded by app.js -->
+      </div>
+      <div id="cart-drawer-footer" class="cart-drawer-footer">
+        <div class="cart-drawer-subtotal-row">
+          <span style="color: var(--text-secondary); font-weight: 600; font-size: 0.95rem;">{% tr 'Subtotal:' %}</span>
+          <span id="cart-drawer-subtotal" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">{{ cart_subtotal|default:0|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}</span>
+        </div>
+        <div class="cart-drawer-perk">
+          <svg class="icon" aria-hidden="true" style="width: 0.9rem; height: 0.9rem;"><use href="#i-check"/></svg>
+          <span>{% if request.LANGUAGE_CODE == 'en' %}Guaranteed authenticity & express delivery{% else %}ضمانت اصالت کالا و ارسال سریع{% endif %}</span>
+        </div>
+        <div class="cart-drawer-actions">
+          <a href="{% url 'cart:detail' %}" class="btn btn-outline" style="justify-content: center; font-weight: 700;">{% tr 'View Cart' %}</a>
+          <a href="{% url 'orders:checkout' %}" id="cart-drawer-checkout-btn" class="btn btn-primary" style="justify-content: center; font-weight: 700;">{% tr 'Proceed to Checkout' %}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Body Content -->
+  <main class="main-content" id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Mobile Bottom Sticky Navigation -->
+  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <a href="{% url 'core:home' %}" style="display: flex; flex-direction: column; align-items: center; gap: 0.15rem; font-size: 0.72rem;">
+      <svg class="icon icon-lg" aria-hidden="true"><use href="#i-grid"/></svg>
+      {% tr 'Home' %}
+    </a>
+    <a href="{% url 'catalog:shop' %}" style="display: flex; flex-direction: column; align-items: center; gap: 0.15rem; font-size: 0.72rem;">
+      <svg class="icon icon-lg" aria-hidden="true"><use href="#i-search"/></svg>
+      {% tr 'Shop' %}
+    </a>
+    {% if not user.is_staff %}<a href="{% url 'cart:detail' %}" class="toggle-cart-drawer" style="display: flex; flex-direction: column; align-items: center; gap: 0.15rem; font-size: 0.72rem; position: relative;">
+      <svg class="icon icon-lg" aria-hidden="true"><use href="#i-cart"/></svg>
+      <span class="action-badge cart-badge-count" style="{% if cart_item_count == 0 %}display:none;{% endif %} top: -8px; inset-inline-end: 30%;">{{ cart_item_count }}</span>
+      {% tr 'Cart' %}
+    </a>{% endif %}
+    {% if user.is_authenticated %}
+      <a href="{% url 'accounts:profile' %}" style="display: flex; flex-direction: column; align-items: center; gap: 0.15rem; font-size: 0.72rem;">
+        <svg class="icon icon-lg" aria-hidden="true"><use href="#i-user"/></svg>
+        {% tr 'My Account' %}
+      </a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}" style="display: flex; flex-direction: column; align-items: center; gap: 0.15rem; font-size: 0.72rem;">
+        <svg class="icon icon-lg" aria-hidden="true"><use href="#i-user"/></svg>
+        {% tr 'Login' %}
+      </a>
+    {% endif %}
+  </nav>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container" style="position: relative; z-index: 1;">
+
+      <!-- Trust badges row -->
+      <div class="em-f-trust">
+        <div class="em-f-trust-item">
+          <span class="em-f-trust-icon"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-truck"/></svg></span>
+          <div>
+            <div class="em-f-trust-title">{% tr 'Fast and reliable shipping' %}</div>
+            <div class="em-f-trust-sub">{% tr 'Express delivery and nationwide shipping' %}</div>
+          </div>
+        </div>
+        <div class="em-f-trust-item">
+          <span class="em-f-trust-icon"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-shield"/></svg></span>
+          <div>
+            <div class="em-f-trust-title">{% tr 'Product Authenticity Guarantee' %}</div>
+            <div class="em-f-trust-sub">{% tr 'Guaranteed 100% original products' %}</div>
+          </div>
+        </div>
+        <div class="em-f-trust-item">
+          <span class="em-f-trust-icon"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-card"/></svg></span>
+          <div>
+            <div class="em-f-trust-title">{% tr 'Secure Payment' %}</div>
+            <div class="em-f-trust-sub">{% tr 'Safe banking gateway with dynamic passwords' %}</div>
+          </div>
+        </div>
+        <div class="em-f-trust-item">
+          <span class="em-f-trust-icon"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-returns"/></svg></span>
+          <div>
+            <div class="em-f-trust-title">{% tr '7-Day Return Guarantee' %}</div>
+            <div class="em-f-trust-sub">{% tr 'Easy, hassle-free returns' %}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-grid">
+        <!-- Col 1: About & Info -->
+        <div>
+          <h4 style="display:flex;align-items:center;gap:0.5rem;"><span class="em-mark" style="width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(255,178,36,.12);border:1px solid rgba(255,178,36,.3);color:#FFC24B"><svg aria-hidden="true" style="width:16px;height:16px"><use href="#i-spark"/></svg></span> {{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:"Shop" }}</h4>
+          <p style="font-size: 0.88rem; line-height: 1.9; margin-bottom: 1rem; color: #B9B9C4;">
+            {{ site_settings.about_us|tr:request.LANGUAGE_CODE|truncatewords:25|default:"Premium e-commerce platform offering thousands of authentic products across fashion, electronics, home essentials, and more." }}
+          </p>
+          <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
+            <div style="display:flex;align-items:center;gap:0.45rem;"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> <span>{% tr 'Contact Address' %}</span></div>
+            <div style="display:flex;align-items:center;gap:0.45rem;"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> <span dir="ltr">{{ site_settings.phone|default:"+98 21 8888 9999" }}</span></div>
+            <div style="display:flex;align-items:center;gap:0.45rem;"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg> <span dir="ltr">{{ site_settings.email|default:"support@shop.local" }}</span></div>
+            <div style="display:flex;align-items:center;gap:0.45rem;"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> <span>{% tr 'Working Hours Value' %}</span></div>
+          </div>
+          <div class="em-social" style="margin-top: 1.1rem;">
+            {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-instagram"/></svg></a>{% endif %}
+            {% if site_settings.telegram_url %}<a href="{{ site_settings.telegram_url }}" target="_blank" rel="noopener" aria-label="Telegram"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-send"/></svg></a>{% endif %}
+          </div>
+        </div>
+
+        <!-- Col 2: Quick Links -->
+        <div>
+          <h4>{% tr 'Quick Links' %}</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem;">
+            <li><a href="{% url 'catalog:shop' %}">{% tr 'All Products' %}</a></li>
+            <li><a href="{% url 'cart:detail' %}">{% tr 'Cart' %}</a></li>
+            <li><a href="{% url 'accounts:order_history' %}">{% tr 'Order Tracking' %}</a></li>
+            <li><a href="{% url 'core:about' %}">{% tr 'About Us' %}</a></li>
+            <li><a href="{% url 'core:contact' %}">{% tr 'Contact Us' %}</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Legal Policies -->
+        <div>
+          <h4>{% tr 'Help & Policies' %}</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem;">
+            <li><a href="{% url 'core:shipping_policy' %}">{% tr 'Shipping Policy' %}</a></li>
+            <li><a href="{% url 'core:returns_policy' %}">{% tr 'Return Policy' %}</a></li>
+            <li><a href="{% url 'core:privacy' %}">{% tr 'Privacy Policy' %}</a></li>
+            <li><a href="{% url 'core:terms' %}">{% tr 'Terms of Service' %}</a></li>
+            <li><a href="{% url 'core:faq' %}">{% tr 'FAQ' %}</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Newsletter -->
+        <div>
+          <h4>{% tr 'Newsletter Subscription' %}</h4>
+          <p style="font-size: 0.85rem; margin-bottom: 0.9rem; color: #9A9AA5; line-height: 1.9;">{% tr 'Newsletter description' %}</p>
+          <form id="newsletter-form" action="{% url 'core:newsletter_subscribe' %}" method="POST" style="display: flex; gap: 0.5rem;">
+            {% csrf_token %}
+            <div style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
+              <label>Website (do not fill)<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+            </div>
+            <input type="email" name="email" class="form-input" placeholder="{% tr 'Your email address...' %}" required maxlength="254" style="font-size: 0.85rem;">
+            <button type="submit" class="btn btn-primary btn-sm">{% tr 'Subscribe' %}</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="em-f-bottom">
+        <div>{{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:"Shop" }} © {{ current_year|default:"2026"|num:request.LANGUAGE_CODE }}. {% tr 'All rights reserved' %}</div>
+        <div class="em-f-pay">
+          <span>Shetab</span>
+          <span>ZarinPal</span>
+          <span>VISA</span>
+          <span>Mastercard</span>
+          <span class="badge badge-success" style="font-size:0.72rem"><svg class="icon" style="width:0.9em;height:0.9em" aria-hidden="true"><use href="#i-check-circle"/></svg> {% tr 'Secure Payment' %}</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Cookie consent banner -->
+  <div id="cookie-banner" class="cookie-banner" hidden>
+    <div class="cookie-banner-text">
+      {% tr 'Cookie Consent Message' %}
+      <a href="{% url 'core:cookie_policy' %}" style="text-decoration: underline; margin-inline-start: 0.25rem;">{% tr 'Cookie Policy' %}</a>
+    </div>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="btn btn-primary btn-sm" onclick="acceptCookies()">{% tr 'Accept' %}</button>
+      <button class="btn btn-outline btn-sm" onclick="declineCookies()">{% tr 'Essential Only' %}</button>
+    </div>
+  </div>
+
+  <!-- Mobile Sticky CTA Bar -->
+  <div class="mobile-sticky-cta hide-desktop">
+    <div style="display:flex; flex-direction:column;">
+      <span style="font-size:0.72rem; color:var(--text-muted); line-height: 1.2;">{% tr 'Special Offers' %}</span>
+      <span style="font-size:0.92rem; font-weight:800; color:var(--primary);">{% tr 'Special Autumn Deals' %}</span>
+    </div>
+    <a href="{% url 'catalog:shop' %}?discount=1" class="btn btn-primary btn-sm">
+      {% tr 'Shop Now' %}
+    </a>
+  </div>
+
+  <!-- Back to top -->
+  <button id="back-to-top" aria-label="{% tr 'Back to Top' %}" title="{% tr 'Back to Top' %}">
+    <svg class="icon icon-lg" aria-hidden="true"><use href="#i-arrow-up"/></svg>
+  </button>
+
+  <!-- Scripts -->
+  <script src="{% static 'js/motion.js' %}"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script src="{% static 'js/wow.js' %}"></script>
+  <script src="{% static 'js/premium.js' %}"></script>
+  <script>
+    // Form submit loading state
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function() {
+          if (form.method && form.method.toUpperCase() === 'GET') return;
+          var submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn && !submitBtn.disabled) {
+            setTimeout(function() {
+              submitBtn.disabled = true;
+              submitBtn.setAttribute('data-original-html', submitBtn.innerHTML);
+              submitBtn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .6s linear infinite;margin-inline-end:6px;vertical-align:-2px;"></span> {% tr "Processing..." %}';
+            }, 10);
+          }
+        });
+      });
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
+  {% if analytics_id %}
+  <!-- Analytics (enabled via ANALYTICS_ID) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ analytics_id }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ analytics_id }}', { 'anonymize_ip': true });
+  </script>
+  {% endif %}
+</body>
+</html>

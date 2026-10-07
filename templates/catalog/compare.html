@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}مقایسه محصولات | {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <nav style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+    <a href="{% url 'core:home' %}">صفحه نخست</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <a href="{% url 'catalog:shop' %}">فروشگاه</a>
+    <span style="margin-inline: 0.5rem;">/</span>
+    <span style="color: var(--text-primary); font-weight: 600;">مقایسه محصولات</span>
+  </nav>
+
+  <div style="margin-bottom: 1.75rem;">
+    <span class="section-eyebrow">⚖️ مقایسه دقیق</span>
+    <h1 style="font-size: 1.6rem; font-weight: 900; color: var(--text-primary);">مقایسه لحظه‌ای محصولات</h1>
+    <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;">تفاوت‌ها را با رنگ سبز پیدا کنید؛ بهترین قیمت به‌صورت خودکار مشخص می‌شود.</p>
+  </div>
+
+  {% if products|length < 2 %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">⚖️</div>
+      <h3 style="margin-bottom: 0.5rem;">حداقل ۲ محصول برای مقایسه انتخاب کنید</h3>
+      <p style="margin-bottom: 1.5rem; font-size: 0.95rem; color: var(--text-muted);">در صفحه محصولات یا صفحه اصلی، روی آیکون ⚖️ هر کالا کلیک کنید.</p>
+      <a href="{% url 'catalog:shop' %}" class="btn btn-primary btn-shimmer">ورود به فروشگاه</a>
+    </div>
+  {% else %}
+    <div style="overflow-x: auto;">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="width: 170px; min-width: 170px;">ویژگی</th>
+            {% for product in products %}
+              <th style="min-width: 230px;">
+                <a href="{{ product.get_absolute_url }}" style="display: block; text-align: center;">
+                  <img src="{{ product.get_primary_image }}" alt="{{ product.name }}" style="width: 120px; height: 120px; object-fit: contain; margin-bottom: 0.5rem;">
+                  <div style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;">{{ product.name }}</div>
+                </a>
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight: 800;">قیمت</td>
+            {% for product in products %}
+              <td>
+                {% if product.has_discount %}
+                  <div class="price-old" style="font-size: 0.82rem;">{{ product.base_price|toman }}</div>
+                {% endif %}
+                <span class="price-current {% if product.get_effective_price == best_price %}compare-win{% endif %}" style="font-size: 1.1rem;">
+                  {{ product.get_effective_price|toman }} تومان
+                </span>
+                {% if product.get_effective_price == best_price %}<div class="compare-win" style="font-size: 0.78rem;">✓ بهترین قیمت</div>{% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td style="font-weight: 800;">دسته‌بندی</td>
+            {% for product in products %}<td>{{ product.category.name }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <td style="font-weight: 800;">برند</td>
+            {% for product in products %}<td>{{ product.brand.name|default:"-" }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <td style="font-weight: 800;">امتیاز کاربران</td>
+            {% for product in products %}
+              <td>
+                <span class="rating-star-interactive">★</span>
+                <strong>{{ product.get_average_rating|default:"بدون امتیاز" }}</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">({{ product.get_review_count }} نظر)</span>
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td style="font-weight: 800;">وضعیت موجودی</td>
+            {% for product in products %}
+              <td>
+                {% if product.is_in_stock %}
+                  <span class="badge badge-success">✓ موجود در انبار</span>
+                {% else %}
+                  <span class="badge badge-danger">ناموجود</span>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+          {% for row in spec_rows %}
+            <tr>
+              <td style="font-weight: 800;">{{ row.key }}</td>
+              {% for value in row.values %}
+                <td {% if not row.identical %}class="compare-win"{% endif %}>{{ value }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+          <tr>
+            <td></td>
+            {% for product in products %}
+              <td style="text-align: center;">
+                <button class="btn btn-primary btn-sm btn-shimmer" onclick="addToCart({{ product.id }})" style="border-radius: var(--radius-full); margin-inline: 0.25rem;">+ افزودن به سبد</button>
+              </td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top: 1.5rem; text-align: center;">
+      <button class="btn btn-outline btn-sm" onclick="__wowCompare.clear(); window.location.href='{% url 'catalog:shop' %}'">پاک کردن لیست مقایسه و بازگشت</button>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load shop_filters %}
+
+{% block title %}مدیریت سفارشات | {{ site_settings.site_name }}{% endblock %}
+
+{% block dashboard_content %}
+  <div class="admin-topbar">
+    <h2 style="font-size: 1.25rem; font-weight: 800;"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-card"/></svg> مدیریت سفارشات</h2>
+    <a href="{% url 'dashboard:overview' %}" class="btn btn-outline btn-sm">← بازگشت به داشبورد</a>
+  </div>
+
+  <div class="card">
+    <form method="GET" style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:flex-end;">
+      <div style="flex:2; min-width:220px;">
+        <label style="font-size:0.82rem; font-weight:600; display:block; margin-bottom:0.35rem;">جستجو:</label>
+        <input type="text" name="q" value="{{ q }}" placeholder="شماره سفارش، نام خریدار یا تلفن..." class="form-input">
+      </div>
+      <div style="min-width:170px;">
+        <label style="font-size:0.82rem; font-weight:600; display:block; margin-bottom:0.35rem;">وضعیت:</label>
+        <select name="status" class="form-select">
+          <option value="">همه وضعیت‌ها</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">اعمال فیلتر</button>
+    </form>
+  </div>
+
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="table-wrap" style="border:none; border-radius:0;">
+      <table class="table-admin">
+        <thead>
+          <tr>
+            <th>شماره فاکتور</th>
+            <th>مشتری</th>
+            <th>مبلغ</th>
+            <th>وضعیت</th>
+            <th>کد رهگیری</th>
+            <th>عملیات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+            <tr>
+              <td style="font-family:var(--font-mono); font-weight:700;">{{ order.order_number }}</td>
+              <td>{{ order.shipping_name }}<br><small style="color:var(--text-muted);">{{ order.shipping_phone }}</small></td>
+              <td style="font-weight:700;">{{ order.grand_total|toman }} تومان</td>
+              <td><span class="badge badge-primary">{{ order.get_status_display }}</span></td>
+              <td>
+                <form action="{% url 'dashboard:update_order_status' order.order_number %}" method="POST" style="display:flex; gap:0.35rem;">
+                  {% csrf_token %}
+                  <input type="hidden" name="status" value="{{ order.status }}">
+                  <input type="text" name="tracking_code" value="{{ order.tracking_code }}" placeholder="کد رهگیری" class="form-input" style="font-size:0.78rem; padding:0.35rem 0.5rem; width:140px;">
+                  <button type="submit" class="btn btn-outline btn-sm">ثبت</button>
+                </form>
+              </td>
+              <td><a href="{% url 'accounts:order_detail' order.order_number %}" class="btn btn-outline btn-sm" target="_blank">فاکتور</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">سفارشی یافت نشد.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

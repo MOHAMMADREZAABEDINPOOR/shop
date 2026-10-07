@@ -1,0 +1,720 @@
+/* ==========================================================================
+   WOW LAYER — 3D Scenes, Cinematic Transitions, Aurora & Micro-interactions
+   (applied on top of tokens/base/components/animations layers)
+   ========================================================================== */
+
+/* ---------- 0. Motion-safe defaults ---------- */
+:root {
+  --wow-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --wow-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- 1. Scroll progress bar ---------- */
+#wow-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: var(--gradient-primary);
+  box-shadow: 0 0 14px rgba(255, 178, 36, 0.65);
+  z-index: 9999;
+  transition: width 0.1s linear;
+  border-radius: 0 3px 3px 0;
+}
+
+/* ---------- 2. Frosted sticky header on scroll ---------- */
+.site-header {
+  transition: box-shadow 0.35s ease, background-color 0.35s ease, backdrop-filter 0.35s ease;
+}
+
+.site-header.wow-header-scrolled {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  box-shadow: 0 10px 32px -8px rgba(15, 23, 42, 0.18);
+}
+
+[data-theme="dark"] .site-header.wow-header-scrolled {
+  background: rgba(11, 15, 25, 0.85);
+  box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.65);
+}
+
+/* ---------- 3. Page transition overlay (SPA-like fade) ---------- */
+#wow-page-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 120%, #3A2407 0%, #030706 100%);
+  transition: opacity 0.28s ease;
+}
+
+#wow-page-transition.wow-transition-active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+main.main-content {
+  animation: wowPageEnter 0.6s var(--wow-ease) both;
+}
+
+@keyframes wowPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.995);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ---------- 4. 3D tilt cards + holographic shine ---------- */
+.wow-tilt {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.wow-tilt .product-card-img,
+.wow-tilt .category-icon-box {
+  transform: translateZ(35px);
+}
+
+.wow-tilt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    circle at var(--wow-mx, 50%) var(--wow-my, 50%),
+    rgba(110, 245, 215, 0.26) 0%,
+    rgba(246, 195, 82, 0.16) 35%,
+    transparent 60%
+  );
+  mix-blend-mode: color-dodge;
+}
+
+.wow-tilt:hover::before {
+  opacity: 1;
+}
+
+/* Holo edge glow that follows the cursor */
+.wow-tilt::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: conic-gradient(
+    from var(--wow-angle, 0deg),
+    #FFB224, #D97706, #FFD98A, #f6c352, #e0932f, #F59E0B, #FFB224
+  );
+  filter: blur(14px);
+}
+
+.wow-tilt:hover::after {
+  opacity: 0.55;
+}
+
+/* ---------- 5. Staggered grid reveal ---------- */
+.wow-stagger > * {
+  opacity: 0;
+  transform: translateY(26px) scale(0.97);
+}
+
+.wow-stagger.wow-stagger-in > * {
+  animation: wowStaggerItem 0.7s var(--wow-ease) both;
+  animation-delay: calc(var(--wow-i, 0) * 70ms);
+}
+
+@keyframes wowStaggerItem {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- 6. Hero 3D scene: cube, rings, shards ---------- */
+.wow-hero-scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  perspective: 900px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Animated aurora mesh behind everything */
+.wow-aurora {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(38% 45% at 20% 30%, rgba(255, 178, 36, 0.32) 0%, transparent 70%),
+    radial-gradient(35% 40% at 80% 20%, rgba(224, 147, 47, 0.22) 0%, transparent 70%),
+    radial-gradient(45% 50% at 60% 85%, rgba(255, 178, 36, 0.24) 0%, transparent 70%);
+  filter: blur(30px);
+  animation: wowAuroraDrift 16s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes wowAuroraDrift {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(3%, -4%, 0) rotate(4deg) scale(1.08); }
+  100% { transform: translate3d(-3%, 3%, 0) rotate(-3deg) scale(1.02); }
+}
+
+/* Moving grid floor (cyberperspective) */
+.wow-grid-floor {
+  position: absolute;
+  left: -50%;
+  right: -50%;
+  bottom: -12%;
+  height: 55%;
+  background-image:
+    linear-gradient(rgba(45, 212, 191, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.16) 1px, transparent 1px);
+  background-size: 44px 44px;
+  transform: perspective(500px) rotateX(62deg);
+  mask-image: linear-gradient(to top, rgba(0,0,0,0.85), transparent 85%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.85), transparent 85%);
+  animation: wowGridScroll 9s linear infinite;
+}
+
+@keyframes wowGridScroll {
+  from { background-position: 0 0; }
+  to { background-position: 0 44px; }
+}
+
+/* 3D rotating gradient cube */
+.wow-cube-wrap {
+  position: absolute;
+  top: 12%;
+  inset-inline-start: 6%;
+  width: 84px;
+  height: 84px;
+  transform-style: preserve-3d;
+  animation: wowCubeSpin 14s linear infinite;
+}
+
+.wow-cube-wrap .wow-cube-face {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid rgba(148, 163, 184, 0.5);
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.18), rgba(255, 178, 36, 0.14));
+  backdrop-filter: blur(2px);
+  box-shadow: inset 0 0 24px rgba(255, 178, 36, 0.25);
+}
+
+.wow-cube-face.f1 { transform: rotateY(0deg) translateZ(42px); }
+.wow-cube-face.f2 { transform: rotateY(90deg) translateZ(42px); }
+.wow-cube-face.f3 { transform: rotateY(180deg) translateZ(42px); }
+.wow-cube-face.f4 { transform: rotateY(270deg) translateZ(42px); }
+.wow-cube-face.f5 { transform: rotateX(90deg) translateZ(42px); }
+.wow-cube-face.f6 { transform: rotateX(-90deg) translateZ(42px); }
+
+@keyframes wowCubeSpin {
+  from { transform: rotateX(-18deg) rotateY(0deg); }
+  to { transform: rotateX(-18deg) rotateY(360deg); }
+}
+
+/* Orbit rings around hero product */
+.wow-orbit {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 14%;
+  width: 460px;
+  height: 460px;
+  margin-top: -230px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(148, 163, 184, 0.35);
+  transform: rotateX(68deg);
+  animation: wowOrbitSpin 22s linear infinite;
+}
+
+.wow-orbit::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fde68a, #e0932f);
+  box-shadow: 0 0 18px rgba(224, 147, 47, 0.9);
+}
+
+.wow-orbit.orbit-2 {
+  width: 580px;
+  height: 580px;
+  margin-top: -290px;
+  border-color: rgba(255, 178, 36, 0.25);
+  animation-duration: 32s;
+  animation-direction: reverse;
+}
+
+.wow-orbit.orbit-2::before {
+  background: radial-gradient(circle at 30% 30%, #FFD98A, #D97706);
+  box-shadow: 0 0 18px rgba(255, 178, 36, 0.9);
+}
+
+@keyframes wowOrbitSpin {
+  from { transform: rotateX(68deg) rotateZ(0deg); }
+  to { transform: rotateX(68deg) rotateZ(360deg); }
+}
+
+/* Floating glass shards */
+.wow-shard {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  animation: wowShardFloat 9s ease-in-out infinite;
+}
+
+.wow-shard.s1 { top: 18%; inset-inline-end: 8%; animation-delay: 0s; transform: rotate(18deg); }
+.wow-shard.s2 { bottom: 20%; inset-inline-start: 12%; width: 18px; height: 18px; animation-delay: 2.2s; }
+.wow-shard.s3 { top: 60%; inset-inline-end: 4%; width: 14px; height: 14px; border-radius: 50%; animation-delay: 4s; }
+
+@keyframes wowShardFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-22px) rotate(24deg); }
+}
+
+/* Hero parallax layers driven by mouse (JS sets vars) */
+.hero-stage {
+  perspective: 1200px;
+}
+
+.hero-parallax {
+  transform: translate3d(calc(var(--wow-px, 0) * var(--wow-depth, 1) * -18px), calc(var(--wow-py, 0) * var(--wow-depth, 1) * -14px), 0);
+  transition: transform 0.25s ease-out;
+}
+
+.hero-floating-image-wrap .hero-floating-image {
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 30px 60px -15px rgba(0, 0, 0, 0.7),
+    0 0 45px rgba(255, 178, 36, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* ---------- 7. Animated stat counters ---------- */
+.wow-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin: -1.75rem 1.5rem 0;
+  position: relative;
+  z-index: 5;
+}
+
+.wow-stat-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  text-align: center;
+  color: #fff;
+  transition: transform 0.3s var(--wow-ease), border-color 0.3s ease;
+}
+
+.wow-stat-box:hover {
+  transform: translateY(-4px);
+  border-color: rgba(94, 234, 212, 0.55);
+}
+
+.wow-stat-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #99f6e4, #FFC24B, #f6c352);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-variant-numeric: tabular-nums;
+}
+
+.wow-stat-label {
+  font-size: 0.8rem;
+  color: #C9C9D2;
+  margin-top: 0.2rem;
+}
+
+/* ---------- 8. Magnetic glow buttons ---------- */
+.wow-magnetic {
+  transition: transform 0.2s var(--wow-ease-bounce);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.btn.wow-ripple::before {
+  animation: wowRipple 0.6s ease-out forwards;
+}
+
+@keyframes wowRipple {
+  from { width: 0; height: 0; opacity: 0.5; }
+  to { width: 320px; height: 320px; opacity: 0; }
+}
+
+/* ---------- 9. Fly-to-cart product animation ---------- */
+.wow-fly-item {
+  position: fixed;
+  z-index: 10001;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 10px 30px rgba(217, 119, 6, 0.55);
+  pointer-events: none;
+  transition: all 0.75s cubic-bezier(0.5, -0.2, 0.65, 0.5);
+}
+
+@keyframes wowCartBump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.4) rotate(-8deg); }
+  100% { transform: scale(1); }
+}
+
+.wow-cart-bump {
+  animation: wowCartBump 0.55s var(--wow-ease-bounce);
+}
+
+/* ---------- 10. Sparkle burst (add-to-cart confetti) ---------- */
+.wow-sparkle {
+  position: fixed;
+  z-index: 10001;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: wowSparkleOut 0.7s ease-out forwards;
+}
+
+@keyframes wowSparkleOut {
+  from { transform: translate(0, 0) scale(1); opacity: 1; }
+  to { transform: translate(var(--wow-sx), var(--wow-sy)) scale(0.2); opacity: 0; }
+}
+
+/* ---------- 11. Compare drawer bar ---------- */
+#compare-bar {
+  position: fixed;
+  bottom: 1.25rem;
+  inset-inline-start: 50%;
+  transform: translateX(-50%) translateY(140%);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #fff;
+  border-radius: var(--radius-full);
+  padding: 0.55rem 0.7rem 0.55rem 1.2rem;
+  box-shadow: 0 18px 40px -10px rgba(0, 0, 0, 0.55);
+  transition: transform 0.45s var(--wow-ease-bounce);
+}
+
+#compare-bar.compare-bar-visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+.compare-bar-items {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.compare-thumb {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  animation: wowStaggerItem 0.4s var(--wow-ease) both;
+}
+
+.compare-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.compare-thumb button {
+  position: absolute;
+  top: 1px;
+  inset-inline-end: 2px;
+  background: rgba(239, 68, 68, 0.9);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 0.6rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ---------- 11b. Compare button active state ---------- */
+.wow-compare-btn.wow-compare-active {
+  background: var(--gradient-primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.55);
+  animation: badgePop 0.35s var(--wow-ease-bounce);
+}
+
+/* ---------- 12. Compare table page ---------- */
+.compare-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.compare-table th, .compare-table td {
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+
+.compare-table thead th {
+  background: var(--bg-subtle);
+  font-weight: 800;
+}
+
+.compare-table tbody tr:hover td {
+  background: var(--primary-light);
+}
+
+.compare-win {
+  color: var(--success);
+  font-weight: 800;
+}
+
+/* ---------- 13. Filter upgrades ---------- */
+.wow-range-wrap {
+  position: relative;
+  height: 36px;
+  margin-bottom: 0.5rem;
+}
+
+.wow-range-wrap input[type="range"] {
+  position: absolute;
+  inset-inline: 0;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-appearance: none;
+  appearance: none;
+  background: none;
+  pointer-events: none;
+  height: 0;
+}
+
+.wow-range-wrap input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.55);
+  cursor: grab;
+  transition: transform 0.15s ease;
+}
+
+.wow-range-wrap input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.wow-range-track {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  right: 0;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--border);
+}
+
+.wow-range-fill {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 5px;
+  border-radius: 3px;
+  background: var(--gradient-primary);
+}
+
+.wow-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.wow-chip {
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  padding: 0.32rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s var(--wow-ease);
+}
+
+.wow-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.wow-chip.wow-chip-active {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 6px 14px -4px rgba(217, 119, 6, 0.55);
+}
+
+/* ---------- 14. Product gallery 3D (detail page) ---------- */
+.wow-gallery-main {
+  transition: transform 0.3s var(--wow-ease);
+  transform-style: preserve-3d;
+}
+
+.wow-gallery-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Ken Burns breathing for banners */
+.banner-card-bg {
+  animation: wowKenBurns 18s ease-in-out infinite alternate;
+}
+
+@keyframes wowKenBurns {
+  from { transform: scale(1); }
+  to { transform: scale(1.09) translate(-1.5%, 1%); }
+}
+
+.banner-card:hover .banner-card-bg {
+  animation-play-state: paused;
+  transform: scale(1.12);
+}
+
+/* ---------- 15. Marquee upgrade ---------- */
+.marquee {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* ---------- 16. Testimonial / card lift glow ---------- */
+.card {
+  transition: transform 0.3s var(--wow-ease), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-wow-hover:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+  box-shadow: 0 18px 35px -12px rgba(217, 119, 6, 0.3);
+}
+
+/* ---------- 17. Checkout steps morph ---------- */
+.wow-step-dot {
+  transition: all 0.4s var(--wow-ease-bounce);
+}
+
+.wow-step-dot.active {
+  transform: scale(1.25);
+  box-shadow: 0 0 0 6px var(--primary-glow);
+}
+
+/* ---------- 18. Success page celebration ---------- */
+@keyframes wowConfettiFall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+.wow-confetti {
+  position: fixed;
+  top: 0;
+  width: 10px;
+  height: 16px;
+  z-index: 10002;
+  pointer-events: none;
+  animation: wowConfettiFall linear forwards;
+}
+
+/* ---------- 19. Skeleton shimmer upgrade ---------- */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-subtle) 25%, var(--bg-surface-hover) 50%, var(--bg-subtle) 75%);
+  background-size: 200% 100%;
+  animation: wowSkeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes wowSkeleton {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ---------- 20. Toast slide/fade polish ---------- */
+.toast {
+  animation: wowToastIn 0.45s var(--wow-ease-bounce) both;
+}
+
+@keyframes wowToastIn {
+  from { transform: translateY(20px) scale(0.9); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}

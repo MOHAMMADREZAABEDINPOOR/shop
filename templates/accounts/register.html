@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}{% tr 'Create an Account' %} | {{ site_settings.site_name|tr:request.LANGUAGE_CODE }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="auth-page">
+
+    <div class="auth-side">
+      <div style="font-size: 2.4rem;">🎉</div>
+      <h2 style="font-size: 1.7rem; font-weight: 900; line-height: 1.4; color:#fff;">
+        {% if request.LANGUAGE_CODE == 'en' %}Join the Family at{% else %}عضو خانواده{% endif %} <span class="text-gradient-hero">{{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:"Shop" }}</span> {% if request.LANGUAGE_CODE != 'en' %}شو{% endif %}
+      </h2>
+      <p style="color:#C9C9D2; font-size:0.92rem; line-height:1.8;">
+        {% if request.LANGUAGE_CODE == 'en' %}
+          Join with just your email to enjoy special discounts, express shipping, and guaranteed product authenticity.
+        {% else %}
+          فقط با یک ایمیل، به دنیای تخفیف‌های شگفت‌انگیز، ارسال اکسپرس و ضمانت اصالت کالا وارد شو.
+        {% endif %}
+      </p>
+      <div style="display:flex; flex-direction:column; gap:0.7rem; margin-top:0.5rem;">
+        <div class="auth-feature"><span class="auth-feature-icon">🎁</span><span>{% if request.LANGUAGE_CODE == 'en' %}10% off your first order with code WELCOME10{% else %}۱۰٪ تخفیف اولین خرید با کد WELCOME10{% endif %}</span></div>
+        <div class="auth-feature"><span class="auth-feature-icon">🚚</span><span>{% if request.LANGUAGE_CODE == 'en' %}Live order tracking straight to your door{% else %}پیگیری لحظه‌ای سفارش تا درب منزل{% endif %}</span></div>
+        <div class="auth-feature"><span class="auth-feature-icon">♥</span><span>{% if request.LANGUAGE_CODE == 'en' %}Wishlist and 1-click reordering{% else %}لیست علاقه‌مندی و خرید دوباره در یک کلیک{% endif %}</span></div>
+      </div>
+    </div>
+
+    <div class="auth-form-side">
+      <div style="text-align:center; margin-bottom:1.5rem;">
+        <div style="font-size:2rem;">📝</div>
+        <h1 style="font-size:1.35rem; font-weight:800;">{% tr 'Create an Account' %}</h1>
+        <p style="font-size:0.85rem; color:var(--text-muted);">{% if request.LANGUAGE_CODE == 'en' %}Quick signup to track orders and save details{% else %}عضویت سریع جهت پیگیری سفارشات{% endif %}</p>
+      </div>
+
+      <form method="POST" action="{% url 'accounts:register' %}">
+        {% csrf_token %}
+
+        {# Honeypot anti-bot trap (hidden from humans) #}
+        <div style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
+          <label>Website (do not fill)<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        {% if form.errors %}
+          <div style="background-color:var(--danger-light); color:var(--danger); padding:0.75rem 1rem; border-radius:var(--radius-md); font-size:0.86rem; margin-bottom:1.1rem;">
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}<div>• {{ error }}</div>{% endfor %}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">{% tr 'First Name:' %}</label>
+            {{ form.first_name }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">{% tr 'Last Name:' %}</label>
+            {{ form.last_name }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">{% tr 'Email Address:' %}</label>
+          {{ form.email }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">{% tr 'Phone Number:' %}</label>
+          {{ form.phone_number }}
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">{% tr 'Password:' %}</label>
+            {{ form.password }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">{% tr 'Confirm Password:' %}</label>
+            {{ form.password_confirm }}
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg btn-shimmer" style="margin-top:0.5rem; margin-bottom:1rem;">
+          {% tr 'Register Account' %}
+        </button>
+
+        <div style="text-align:center; font-size:0.86rem; color:var(--text-secondary); border-top:1px solid var(--border); padding-top:1rem;">
+          {% if request.LANGUAGE_CODE == 'en' %}
+            Already have an account? <a href="{% url 'accounts:login' %}" style="color:var(--primary); font-weight:700;">Sign in</a>
+          {% else %}
+            قبلاً ثبت‌نام کردی؟ <a href="{% url 'accounts:login' %}" style="color:var(--primary); font-weight:700;">وارد شو</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

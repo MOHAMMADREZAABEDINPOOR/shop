@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}{% tr 'Profile' %} | {{ site_settings.site_name|tr:request.LANGUAGE_CODE }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="profile-layout">
+    
+    <!-- Account Sidebar -->
+    <aside class="card" style="padding: 1.5rem;">
+      <div style="text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 1.25rem;">
+        <div style="width: 76px; height: 76px; border-radius: 50%; background-color: var(--primary-light); color: var(--primary); font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto; overflow: hidden; border: 2px solid var(--primary);">
+          {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="{{ user.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+          {% else %}
+            <svg class="icon icon-xl" aria-hidden="true"><use href="#i-user"/></svg>
+          {% endif %}
+        </div>
+        <div style="font-weight: 800; font-size: 1.05rem;">{{ user.get_full_name }}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">{{ user.email }}</div>
+        {% if user.role != 'CUSTOMER' %}
+          <div style="margin-top: 0.5rem;">
+            <span class="badge badge-primary">{{ user.get_role_display|tr:request.LANGUAGE_CODE }}</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <nav style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.92rem;">
+        <a href="{% url 'accounts:profile' %}" class="nav-link active" style="font-weight: 700;">👤 {% tr 'Account Information' %}</a>
+        {% if not user.is_staff %}<a href="{% url 'accounts:order_history' %}" class="nav-link"><svg class="icon icon-xl" style="color:var(--primary)" aria-hidden="true"><use href="#i-cart"/></svg> {% tr 'Order History' %}</a>
+        <a href="{% url 'accounts:address_list' %}" class="nav-link"><svg class="icon icon-xl" style="color:var(--primary)" aria-hidden="true"><use href="#i-pin"/></svg> {% tr 'My Addresses' %}</a>
+        <a href="{% url 'accounts:wishlist' %}" class="nav-link">♥ {% tr 'Wishlist' %}</a>{% endif %}
+        <a href="{% url 'accounts:change_password' %}" class="nav-link">🔐 {% tr 'Change Password' %}</a>
+        {% if user.is_staff or user.is_superuser %}
+          <a href="{% url 'dashboard:overview' %}" class="nav-link" style="color: var(--accent); font-weight: 700;">⚙️ {% tr 'Dashboard' %}</a>
+        {% endif %}
+        <a href="{% url 'accounts:logout' %}" class="nav-link" style="color: var(--danger); margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">🚪 {% tr 'Logout' %}</a>
+      </nav>
+    </aside>
+
+    <!-- Main Profile Content -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <!-- KPI Chips -->{% if not user.is_staff %}
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; padding: 1.25rem;">
+          <div style="font-size: 2rem;"><svg class="icon icon-xl" style="color:var(--primary)" aria-hidden="true"><use href="#i-cart"/></svg></div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{% if request.LANGUAGE_CODE == 'en' %}Total Orders{% else %}کل سفارش‌ها{% endif %}</div>
+            <div style="font-size: 1.3rem; font-weight: 800;">{{ recent_orders|length|num:request.LANGUAGE_CODE }}</div>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; padding: 1.25rem;">
+          <div style="font-size: 2rem;"><svg class="icon icon-xl" style="color:var(--primary)" aria-hidden="true"><use href="#i-pin"/></svg></div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{% if request.LANGUAGE_CODE == 'en' %}Saved Addresses{% else %}آدرس‌های ثبت‌شده{% endif %}</div>
+            <div style="font-size: 1.3rem; font-weight: 800;">{{ addresses|length|num:request.LANGUAGE_CODE }}</div>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; align-items: center; gap: 1rem; padding: 1.25rem;">
+          <div style="font-size: 2rem;">♥</div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{% tr 'Wishlist' %}</div>
+            <div style="font-size: 1.3rem; font-weight: 800;">{{ wishlist_count|num:request.LANGUAGE_CODE }}</div>
+          </div>
+        </div>
+      </div>
+
+      {% endif %}<!-- Edit Profile Form -->
+      <div class="card" style="padding: 1.75rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+          {% tr 'Edit Profile' %}
+        </h3>
+
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="form-grid-2" style="margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label">{% tr 'First Name:' %}</label>
+              {{ form.first_name }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{% tr 'Last Name:' %}</label>
+              {{ form.last_name }}
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label">{% tr 'Phone Number:' %}</label>
+              {{ form.phone_number }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{% if request.LANGUAGE_CODE == 'en' %}National ID:{% else %}کد ملی:{% endif %}</label>
+              {{ form.national_code }}
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label class="form-label">{% if request.LANGUAGE_CODE == 'en' %}Birth Date:{% else %}تاریخ تولد:{% endif %}</label>
+              {{ form.birth_date }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{% if request.LANGUAGE_CODE == 'en' %}New Avatar Image:{% else %}تصویر آواتار جدید:{% endif %}</label>
+              {{ form.avatar }}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            {% tr 'Save Changes' %}
+          </button>
+        </form>
+      </div>
+
+      {% if not user.is_staff %}<!-- Recent Orders Overview -->
+      <div class="card" style="padding: 1.75rem;">
+        <div class="flex justify-between items-center" style="margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+          <h3 style="font-size: 1.2rem; font-weight: 800;">{% if request.LANGUAGE_CODE == 'en' %}Recent Orders{% else %}آخرین سفارش‌های من{% endif %}</h3>
+          <a href="{% url 'accounts:order_history' %}" style="font-size: 0.85rem; color: var(--primary);">{% if request.LANGUAGE_CODE == 'en' %}View All Orders →{% else %}مشاهده همه سفارشات ←{% endif %}</a>
+        </div>
+
+        {% if recent_orders %}
+          <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+            {% for order in recent_orders %}
+              <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.95rem;">{% if request.LANGUAGE_CODE == 'en' %}Order{% else %}سفارش{% endif %} {{ order.order_number }}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+                    {% if request.LANGUAGE_CODE == 'en' %}Placed on{% else %}ثبت در{% endif %} {{ order.created_at|date:"Y/m/d" }} | {{ order.items.count|num:request.LANGUAGE_CODE }} {% tr 'Items' %}
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                  <span style="font-weight: 800; font-size: 0.95rem; color: var(--primary);">{{ order.grand_total|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}</span>
+                  <span class="badge badge-primary">
+                    {{ order.get_status_display|tr:request.LANGUAGE_CODE }}
+                  </span>
+                  <a href="{% url 'accounts:order_detail' order.order_number %}" class="btn btn-outline btn-sm">{% tr 'View Details' %}</a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">{% if request.LANGUAGE_CODE == 'en' %}No orders placed yet.{% else %}هنوز سفارشی ثبت نکرده‌اید.{% endif %}</div>
+        {% endif %}
+      </div>{% endif %}
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

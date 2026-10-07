@@ -1,0 +1,184 @@
+/* ==========================================================================
+   EMBER · Design Tokens v2
+   «کهربا روی اُبسیدین» — Obsidian & Amber design language
+   Dark-first, cinematic depth, one signature accent (amber) + ember-hot secondary.
+   All legacy variable names are preserved so the whole codebase re-skins
+   from this single source of truth.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* ---------- Typography ---------- */
+  --font-sans: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Arial, sans-serif;
+  --font-display: 'Estedad', 'Noto Kufi Arabic', 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* ---------- Raw ramps ---------- */
+  --amber-200: #FDE7B0;
+  --amber-300: #FDD37A;
+  --amber-400: #FFC24B;
+  --amber-500: #F59E0B;
+  --amber-600: #D97706;
+  --amber-700: #B45309;
+  --amber-800: #92400E;
+  --ember-300: #FFB08E;
+  --ember-400: #FF8A5C;
+  --ember-500: #FF6A3D;
+  --ember-600: #E8551F;
+  --ember-700: #C2410C;
+  --on-ember: #231200;
+
+  /* ---------- Backgrounds & surfaces · Light (porcelain) ---------- */
+  --bg-app: #F4F4F6;
+  --bg-surface: #FFFFFF;
+  --bg-surface-hover: #F5F5F7;
+  --bg-subtle: #EDEEF1;
+  --border: #E3E4E9;
+  --border-strong: #D2D4DB;
+  --border-focus: #D97706;
+
+  --text-primary: #15161A;
+  --text-secondary: #565A66;
+  --text-muted: #878C97;
+  --text-inverse: #FFFFFF;
+
+  /* ---------- Brand · amber ---------- */
+  --primary: #B45309;
+  --primary-hover: #92400E;
+  --primary-light: #FBEFDC;
+  --primary-glow: rgba(217, 119, 6, 0.22);
+  --primary-2: #D97706;
+  --primary-3: #F59E0B;
+
+  /* ---------- Ember · hot accent ---------- */
+  --accent: #C2410C;
+  --accent-hover: #9A3412;
+  --accent-light: #FDE8DF;
+  --accent-glow: rgba(194, 65, 12, 0.22);
+  --gold: #A16207;
+
+  /* ---------- Semantic ---------- */
+  --success: #15803D;
+  --success-light: #E7F5EC;
+  --warning: #B7791F;
+  --warning-light: #FBF3DF;
+  --danger: #DC2626;
+  --danger-light: #FCE9E9;
+  --info: #0E7490;
+  --info-light: #E0F4F9;
+
+  /* ---------- Shape ---------- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-2xl: 30px;
+  --radius-3xl: 40px;
+  --radius-full: 9999px;
+
+  /* ---------- Gradients ---------- */
+  --gradient-primary: linear-gradient(135deg, #FFC24B 0%, #F59E0B 48%, #D97706 100%);
+  --gradient-accent: linear-gradient(135deg, #FF8A5C 0%, #FF6A3D 52%, #E8551F 100%);
+  --gradient-dark: linear-gradient(155deg, #0B0B0E 0%, #131318 55%, #1C1C23 100%);
+  --gradient-success: linear-gradient(135deg, #4ADE80 0%, #16A34A 100%);
+  --gradient-aurora: linear-gradient(115deg, #FFC24B 0%, #FF7A38 45%, #E8C474 100%);
+  --gradient-gold: linear-gradient(135deg, #FCE9B0 0%, #D9A844 52%, #8A6410 100%);
+  --gradient-ink: linear-gradient(160deg, #060607 0%, #0C0C0F 45%, #15151A 100%);
+  --gradient-edge: linear-gradient(115deg, rgba(255, 178, 36, 0.85), rgba(255, 106, 61, 0.35) 45%, rgba(232, 196, 116, 0.65));
+
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-blur: saturate(1.5) blur(18px);
+
+  /* ---------- Easings & durations ---------- */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+  --dur-1: 0.12s;
+  --dur-2: 0.2s;
+  --dur-3: 0.32s;
+  --dur-4: 0.45s;
+
+  /* ---------- Shadows (warm-tinted) ---------- */
+  --shadow-sm: 0 1px 2px rgba(24, 18, 8, 0.05);
+  --shadow-md: 0 3px 10px -2px rgba(24, 18, 8, 0.09), 0 1px 3px rgba(24, 18, 8, 0.05);
+  --shadow-lg: 0 14px 34px -12px rgba(24, 18, 8, 0.16), 0 4px 10px -4px rgba(24, 18, 8, 0.06);
+  --shadow-xl: 0 28px 60px -18px rgba(24, 18, 8, 0.22), 0 10px 20px -10px rgba(24, 18, 8, 0.08);
+  --shadow-glow: 0 0 0 1px rgba(217, 119, 6, 0.16), 0 16px 44px -16px rgba(217, 119, 6, 0.35);
+  --shadow-float: 0 26px 55px -24px rgba(24, 18, 8, 0.3);
+  --shadow-deep: 0 42px 90px -32px rgba(24, 18, 8, 0.38);
+
+  /* ---------- Layer scale ---------- */
+  --z-header: 120;
+  --z-drawer: 220;
+  --z-toast: 320;
+  --z-rise: 400;
+
+  /* ---------- Legacy aliases ---------- */
+  --bg-soft: var(--bg-subtle);
+
+  /* ---------- Admin ---------- */
+  --admin-sidebar-bg: #0B0B0E;
+  --admin-sidebar-text: #CBCCD2;
+
+  /* ---------- Transitions (legacy names) ---------- */
+  --transition-fast: 0.12s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.32s ease;
+}
+
+/* ---------- Dark · obsidian night ---------- */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-app: #08080A;
+  --bg-surface: #111114;
+  --bg-surface-hover: #18181D;
+  --bg-subtle: #0D0D10;
+  --border: #24242B;
+  --border-strong: #33333C;
+  --border-focus: #FFB224;
+
+  --text-primary: #F3F3F5;
+  --text-secondary: #A5A5AF;
+  --text-muted: #6F6F79;
+  --text-inverse: #0A0A0C;
+
+  --primary: #FFB224;
+  --primary-hover: #FFC24B;
+  --primary-light: rgba(255, 178, 36, 0.12);
+  --primary-glow: rgba(255, 178, 36, 0.28);
+  --primary-2: #FF7A38;
+  --primary-3: #FFD98A;
+
+  --accent: #FF6A3D;
+  --accent-hover: #FF8A5C;
+  --accent-light: rgba(255, 106, 61, 0.13);
+  --accent-glow: rgba(255, 106, 61, 0.3);
+  --gold: #E8C474;
+
+  --success: #4ADE80;
+  --success-light: rgba(74, 222, 128, 0.12);
+  --warning: #FBBF24;
+  --warning-light: rgba(251, 191, 36, 0.12);
+  --danger: #F87171;
+  --danger-light: rgba(248, 113, 113, 0.13);
+  --info: #38BDF8;
+  --info-light: rgba(56, 189, 248, 0.12);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 34px -12px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 30px 60px -18px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 0 1px rgba(255, 178, 36, 0.18), 0 18px 50px -18px rgba(255, 178, 36, 0.4);
+  --shadow-float: 0 30px 65px -26px rgba(0, 0, 0, 0.8);
+  --shadow-deep: 0 46px 100px -34px rgba(0, 0, 0, 0.85);
+
+  --glass-bg: rgba(15, 15, 18, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --admin-sidebar-bg: #060608;
+  --admin-sidebar-text: #C6C7CD;
+}

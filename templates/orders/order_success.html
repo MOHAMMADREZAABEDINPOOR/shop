@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}سفارش ثبت شد | {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<span class="wow-celebrate" hidden aria-hidden="true"></span>
+<div class="container" style="max-width: 650px; margin: 2.5rem auto;">
+
+  <div class="card" style="padding: 2.5rem; text-align: center;">
+    <div style="width: 72px; height: 72px; border-radius: 50%; background-color: var(--success-light); color: var(--success); font-size: 2.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto;">
+      ✓
+    </div>
+    <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem;">
+      سفارش شما با موفقیت ثبت شد
+    </h1>
+    <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1.75rem;">
+      شماره سفارش شما: <strong>{{ order.order_number }}</strong>
+    </p>
+
+    <div style="background-color: var(--bg-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; text-align: right; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+      <div class="flex justify-between">
+        <span style="color: var(--text-muted);">تحویل‌گیرنده:</span>
+        <strong>{{ order.shipping_name }} ({{ order.shipping_phone }})</strong>
+      </div>
+      <div class="flex justify-between">
+        <span style="color: var(--text-muted);">آدرس تحویل:</span>
+        <span>{{ order.shipping_province }}، {{ order.shipping_city }} - {{ order.shipping_address_line }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span style="color: var(--text-muted);">مبلغ نهایی:</span>
+        <strong style="color: var(--primary);">{{ order.grand_total|toman }} تومان</strong>
+      </div>
+      <div class="flex justify-between">
+        <span style="color: var(--text-muted);">وضعیت سفارش:</span>
+        <span class="badge badge-success">{{ order.get_status_display }}</span>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem;">
+      <a href="{% url 'accounts:order_detail' order.order_number %}" class="btn btn-primary btn-block">
+        پیگیری وضعیت سفارش
+      </a>
+      <a href="{% url 'core:home' %}" class="btn btn-outline btn-block">
+        بازگشت به فروشگاه
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

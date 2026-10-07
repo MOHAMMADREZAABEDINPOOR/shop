@@ -1,0 +1,40 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+{% load admin_stats %}
+
+{% block content %}
+{% admin_quick_stats as qs %}
+<div class="ag-stats-strip">
+  <a class="ag-stat-card ag-stat-blue" href="{% url 'admin:catalog_product_changelist' %}">
+    <span class="ag-stat-icon">📦</span>
+    <span class="ag-stat-num">{{ qs.products }}</span>
+    <span class="ag-stat-label">محصول فعال</span>
+  </a>
+  <a class="ag-stat-card ag-stat-amber" href="{% url 'admin:orders_order_changelist' %}?status__in=PENDING,AWAITING_PAYMENT">
+    <span class="ag-stat-icon">🧾</span>
+    <span class="ag-stat-num">{{ qs.orders_pending }}</span>
+    <span class="ag-stat-label">سفارش در انتظار پرداخت</span>
+  </a>
+  <a class="ag-stat-card ag-stat-purple" href="{% url 'admin:orders_order_changelist' %}?status=PROCESSING">
+    <span class="ag-stat-icon">🚚</span>
+    <span class="ag-stat-num">{{ qs.orders_processing }}</span>
+    <span class="ag-stat-label">در حال آماده‌سازی</span>
+  </a>
+  <a class="ag-stat-card ag-stat-pink" href="{% url 'admin:core_contactmessage_changelist' %}?is_read__exact=0">
+    <span class="ag-stat-icon">💬</span>
+    <span class="ag-stat-num">{{ qs.unread_messages }}</span>
+    <span class="ag-stat-label">پیام خوانده‌نشده</span>
+  </a>
+  <a class="ag-stat-card ag-stat-green" href="{% url 'admin:reviews_review_changelist' %}?is_approved__exact=0">
+    <span class="ag-stat-icon">⭐</span>
+    <span class="ag-stat-num">{{ qs.pending_reviews }}</span>
+    <span class="ag-stat-label">دیدگاه در انتظار تأیید</span>
+  </a>
+  <a class="ag-stat-card ag-stat-dark" href="/dashboard/">
+    <span class="ag-stat-icon">📊</span>
+    <span class="ag-stat-num">→</span>
+    <span class="ag-stat-label">داشبورد فروشندگان</span>
+  </a>
+</div>
+{{ block.super }}
+{% endblock %}

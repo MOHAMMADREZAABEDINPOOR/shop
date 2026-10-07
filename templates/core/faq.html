@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}{% tr 'FAQ' %} | {{ site_settings.site_name|tr:request.LANGUAGE_CODE }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 2rem auto;">
+  <div class="card" style="padding: 2.5rem;">
+    <h1 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 2rem; text-align: center;">
+      {% if request.LANGUAGE_CODE == 'en' %}Frequently Asked Questions{% else %}پرسش‌های متداول مشتریان{% endif %}
+    </h1>
+
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+      <details style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; background-color: var(--bg-surface);">
+        <summary style="font-weight: 700; cursor: pointer; color: var(--primary);">
+          {% if request.LANGUAGE_CODE == 'en' %}How do I place an order?{% else %}نحوه ثبت سفارش در فروشگاه چگونه است؟{% endif %}
+        </summary>
+        <p style="margin-top: 0.75rem; font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+          {% if request.LANGUAGE_CODE == 'en' %}
+            Select your desired products and variants (color, storage), add them to your cart, proceed to checkout, provide your shipping address, and complete your payment securely.
+          {% else %}
+            کالاهای مورد نظر خود را پس از انتخاب تنوع (رنگ و مشخصات) به سبد خرید اضافه کرده و با ورود به صفحه تسویه حساب و ثبت آدرس پستی، سفارش خود را تکمیل نمایید.
+          {% endif %}
+        </p>
+      </details>
+
+      <details style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; background-color: var(--bg-surface);">
+        <summary style="font-weight: 700; cursor: pointer; color: var(--primary);">
+          {% if request.LANGUAGE_CODE == 'en' %}How long does shipping take?{% else %}سفارش‌ها ظرف چند روز به دست خریدار می‌رسد؟{% endif %}
+        </summary>
+        <p style="margin-top: 0.75rem; font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+          {% if request.LANGUAGE_CODE == 'en' %}
+            Orders within Tehran are delivered within 24 business hours, and provincial shipments via Express Post or Tipax take 2 to 3 business days.
+          {% else %}
+            سفارشات شهر تهران ظرف ۲۴ ساعت کاری و شهرستان‌ها با پست پیشتاز یا تیپاکس ظرف ۲ الی ۳ روز کاری تحویل داده می‌شوند.
+          {% endif %}
+        </p>
+      </details>
+
+      <details style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; background-color: var(--bg-surface);">
+        <summary style="font-weight: 700; cursor: pointer; color: var(--primary);">
+          {% if request.LANGUAGE_CODE == 'en' %}How can I track my order?{% else %}چگونه می‌توانم وضعیت سفارش خود را پیگیری کنم؟{% endif %}
+        </summary>
+        <p style="margin-top: 0.75rem; font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+          {% if request.LANGUAGE_CODE == 'en' %}
+            Visit the "Order History" section in your user profile to track order statuses and view national postal tracking codes in real-time.
+          {% else %}
+            با مراجعه به بخش «سفارش‌های من» در پروفایل کاربری، کلیه وضعیت‌ها به همراه کد رهگیری مرسوله پستی قابل مشاهده است.
+          {% endif %}
+        </p>
+      </details>
+
+      <details style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; background-color: var(--bg-surface);">
+        <summary style="font-weight: 700; cursor: pointer; color: var(--primary);">
+          {% if request.LANGUAGE_CODE == 'en' %}Can I return a product?{% else %}آیا امکان مرجوع کردن کالا وجود دارد؟{% endif %}
+        </summary>
+        <p style="margin-top: 0.75rem; font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+          {% if request.LANGUAGE_CODE == 'en' %}
+            Yes, under our 7-day return policy, returns are accepted within 7 days of delivery provided the item is unused or has verified technical defects.
+          {% else %}
+            بله، بر اساس رویه مرجوعی کالا، تا ۷ روز پس از تحویل در صورت عدم استفاده یا وجود نقص فنی امکان عودت کالا وجود دارد.
+          {% endif %}
+        </p>
+      </details>
+    </div>
+  </div>
+</div>
+{% endblock %}

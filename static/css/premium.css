@@ -1,0 +1,946 @@
+/* ==========================================================================
+   LUMIÈRE NOIR — لایه نهایی هویت بصری «یشم آبسیدین»
+   بالاترین سطح طراحی: شیشه‌ی سرد، لبه‌های ایریدسنس، عمق سه‌بعدی، حرکت سینمایی
+   (بعد از تمام لایه‌ها لود می‌شود و هویت کلی سایت را تعریف می‌کند)
+   ========================================================================== */
+
+/* ---------- 1. پس‌زمینه محیطی: مش نور جید + طل ---------- */
+body {
+  background:
+    radial-gradient(1100px 520px at 88% -10%, rgba(255, 178, 36, 0.10), transparent 60%),
+    radial-gradient(920px 480px at 4% 6%, rgba(255, 178, 36, 0.08), transparent 55%),
+    radial-gradient(720px 520px at 52% 112%, rgba(224, 147, 47, 0.07), transparent 60%),
+    var(--bg-app) !important;
+  background-attachment: fixed;
+}
+
+[data-theme="dark"] body {
+  background:
+    radial-gradient(1100px 520px at 88% -10%, rgba(255, 178, 36, 0.16), transparent 60%),
+    radial-gradient(920px 480px at 4% 6%, rgba(255, 178, 36, 0.10), transparent 55%),
+    radial-gradient(720px 520px at 52% 112%, rgba(224, 147, 47, 0.09), transparent 60%),
+    var(--bg-app) !important;
+}
+
+/* ریسمان نورانی چرخان پشت همه‌چیز */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -30% -10%;
+  z-index: -2;
+  background: conic-gradient(from 210deg at 60% 40%,
+      rgba(255, 178, 36, 0.055), rgba(255, 178, 36, 0.05),
+      rgba(246, 195, 82, 0.045), rgba(163, 230, 53, 0.04), rgba(255, 178, 36, 0.055));
+  filter: blur(60px);
+  animation: agAuroraDrift 30s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes agAuroraDrift {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(6deg) scale(1.06); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+/* ---------- 2. نوار اعلان: جریان یشم-طلا ---------- */
+.site-announce {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(120deg, #2A1A06 0%, #D97706 35%, #F59E0B 55%, #8a5a10 100%) !important;
+  background-size: 220% 100% !important;
+  animation: agFlow 10s ease-in-out infinite alternate;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+
+.site-announce::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.32) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: agShine 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes agFlow { to { background-position: 100% 0; } }
+@keyframes agShine { 60%, 100% { transform: translateX(100%); } }
+
+/* ---------- 3. هدر: اسلب شیشه‌ای معلق با لبه ایریدسنس ---------- */
+.site-header {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+  box-shadow: 0 20px 45px -25px rgba(30, 20, 6, 0.30);
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  transition: box-shadow 0.4s var(--ease-spring), border-radius 0.4s var(--ease-spring);
+}
+
+.site-header.wow-header-scrolled {
+  box-shadow: 0 26px 60px -22px rgba(217, 119, 6, 0.35);
+  border-radius: 0 0 24px 24px;
+}
+
+/* خط موی گرادیانی زیر هدر */
+.site-header::after {
+  content: '';
+  position: absolute;
+  inset-inline: 6%;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--gradient-aurora);
+  background-size: 200% 100%;
+  animation: agFlow 7s linear infinite alternate;
+  opacity: 0.8;
+}
+
+.brand-logo {
+  font-weight: 900 !important;
+  letter-spacing: -0.03em;
+}
+
+.brand-logo svg {
+  background: var(--gradient-primary) !important;
+  color: #fff !important;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px -8px rgba(217, 119, 6, 0.65);
+  transition: transform 0.5s var(--ease-spring);
+}
+
+.brand-logo:hover svg { transform: rotate(-8deg) scale(1.08); }
+
+.brand-logo span {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* جستجوی pill شکل */
+.search-input-wrapper, .search-input {
+  border-radius: var(--radius-full) !important;
+}
+
+.search-container:focus-within .search-input-wrapper {
+  box-shadow: 0 0 0 4px var(--primary-glow), 0 14px 30px -12px rgba(217, 119, 6, 0.4) !important;
+  border-color: var(--primary) !important;
+}
+
+.search-dropdown {
+  border-radius: var(--radius-xl) !important;
+  border: 1px solid var(--glass-border) !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-float) !important;
+}
+
+/* لینک‌های ناوبار به‌صورت pill با حالت فعال گرادیانی */
+.navbar { border-top: none !important; gap: 0.3rem; }
+
+.nav-link {
+  border-radius: var(--radius-full);
+  padding: 0.45rem 1rem !important;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.3s var(--ease-spring);
+  position: relative;
+}
+
+.nav-link:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.nav-link.active {
+  background: var(--gradient-primary);
+  color: #fff !important;
+  box-shadow: 0 8px 20px -6px rgba(217, 119, 6, 0.55);
+}
+
+/* دکمه‌های اقدام: دایره‌های شیشه‌ای */
+.action-btn {
+  border-radius: var(--radius-full) !important;
+  transition: all 0.3s var(--ease-spring) !important;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 24px -8px rgba(217, 119, 6, 0.45);
+  background: var(--primary-light) !important;
+}
+
+.action-badge {
+  animation: agPop 0.4s var(--ease-spring);
+  background: var(--gradient-accent) !important;
+  color: #241503 !important;
+}
+
+@keyframes agPop { from { transform: scale(0.4); } to { transform: scale(1); } }
+
+/* ---------- 4. دکمه‌ها: سیستم فشار سه‌بعدی ---------- */
+.btn {
+  border-radius: var(--radius-full) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em;
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring), filter 0.25s ease !important;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: var(--gradient-primary) !important;
+  border: none !important;
+  box-shadow: 0 10px 24px -8px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 34px -10px rgba(217, 119, 6, 0.55), 0 0 18px rgba(255, 178, 36, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
+  filter: brightness(1.06);
+}
+
+.btn:active { transform: translateY(1px) scale(0.97); }
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--border) !important;
+  backdrop-filter: blur(6px);
+}
+
+.btn-outline:hover {
+  border-color: var(--primary) !important;
+  background: var(--primary-light) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -10px var(--primary-glow);
+}
+
+.btn-accent {
+  background: var(--gradient-gold) !important;
+  border: none !important;
+  color: #2a1a03 !important;
+  box-shadow: 0 10px 24px -8px rgba(200, 145, 46, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.btn-accent:hover { filter: brightness(1.08); transform: translateY(-3px); }
+
+/* ---------- 5. کارت‌ها: سطوح زنده با نور نقطه‌ای دنبال‌کننده ماوس ---------- */
+.card {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: 0 24px 50px -30px rgba(30, 20, 6, 0.28);
+  position: relative;
+  transition: transform 0.45s var(--ease-spring), box-shadow 0.45s var(--ease-spring);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(420px circle at var(--ag-mx, 50%) var(--ag-my, 50%),
+              rgba(255, 178, 36, 0.08), transparent 45%);
+}
+
+.card:hover::before { opacity: 1; }
+
+main > .container > .card:hover,
+.split-main-side > .card:hover,
+.split-main-side .card:hover {
+  box-shadow: 0 34px 70px -32px rgba(217, 119, 6, 0.30);
+}
+
+/* خط کلید گرادیانی روی کارت‌ها */
+.card::after {
+  content: '';
+  position: absolute;
+  inset-inline: 12%;
+  top: 0;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--gradient-aurora);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.card:hover::after { opacity: 0.9; }
+
+/* ---------- 6. تیترهای سکشن: کاپ editorial ---------- */
+main .container > section > h2,
+.section-title,
+.catalog-header h1 {
+  position: relative;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em;
+  padding-inline-start: 1rem;
+}
+
+main .container > section > h2::before,
+.section-title::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 5px;
+  border-radius: 5px;
+  background: var(--gradient-primary);
+  box-shadow: 0 0 16px rgba(255, 178, 36, 0.55);
+}
+
+/* H1 صفحات با جلای جید-طلا */
+main h1 {
+  background: linear-gradient(115deg, var(--text-primary) 30%, var(--primary) 52%, #F59E0B 68%, var(--text-primary) 92%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: agH1Flow 9s ease-in-out infinite alternate;
+}
+
+@keyframes agH1Flow { to { background-position: 100% 0; } }
+
+/* ---------- 7. کارت محصول: گالری سه‌بعدی درجه‌یک ---------- */
+.product-card {
+  border-radius: var(--radius-xl) !important;
+  border: 1px solid var(--border) !important;
+  background: var(--bg-surface) !important;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.5s var(--ease-spring),
+    box-shadow 0.5s var(--ease-spring),
+    border-color 0.4s ease;
+  box-shadow: 0 16px 34px -22px rgba(30, 20, 6, 0.30);
+}
+
+.product-card:hover {
+  transform: translateY(-10px) scale(1.015);
+  border-color: rgba(255, 178, 36, 0.5) !important;
+  box-shadow:
+    0 34px 64px -24px rgba(217, 119, 6, 0.35),
+    0 0 0 1px rgba(255, 178, 36, 0.22);
+}
+
+/* عبور هولوگرافیک نور روی کارت */
+.product-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.34) 48%, transparent 60%);
+  transform: translateX(-120%);
+  transition: transform 0.9s var(--ease-out-expo);
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  z-index: 3;
+}
+
+[data-theme="dark"] .product-card::after {
+  background: linear-gradient(115deg, transparent 35%, rgba(94, 234, 212, 0.24) 48%, transparent 60%);
+}
+
+.product-card:hover::after { transform: translateX(120%); }
+
+.product-card-img-wrap { background: radial-gradient(circle at 50% 40%, var(--bg-surface-hover), var(--bg-subtle)) !important; }
+
+.product-card-img {
+  transition: transform 0.7s var(--ease-out-expo), filter 0.5s ease !important;
+}
+
+.product-card:hover .product-card-img {
+  transform: scale(1.09) rotate(-1deg);
+  filter: drop-shadow(0 18px 22px rgba(30, 20, 6, 0.3));
+}
+
+.product-card-title { font-weight: 800 !important; letter-spacing: -0.01em; }
+
+.product-card-body { transform: translateZ(28px); }
+
+.price-current {
+  font-weight: 900 !important;
+  color: var(--primary) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* روبان تخفیف شناور */
+.product-card-badge {
+  border-radius: var(--radius-full) !important;
+  background: linear-gradient(135deg, #fb7185, #e11d48) !important;
+  box-shadow: 0 10px 22px -8px rgba(225, 29, 72, 0.6) !important;
+  animation: agBadgeFloat 3.2s ease-in-out infinite;
+}
+
+@keyframes agBadgeFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(-2deg); }
+}
+
+/* ---------- 8. بج‌ها و چیپ‌ها ---------- */
+.badge {
+  border-radius: var(--radius-full) !important;
+  font-weight: 800 !important;
+  backdrop-filter: blur(6px);
+}
+
+/* ---------- 9. فرم‌ها: اینپوت‌های لامسه‌ای ---------- */
+.form-input, .form-select, textarea.form-input {
+  border-radius: 16px !important;
+  border: 1.5px solid var(--border) !important;
+  background: var(--bg-surface) !important;
+  transition: border-color 0.3s ease, box-shadow 0.35s var(--ease-spring), transform 0.3s ease !important;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 5px var(--primary-glow) !important;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.form-label { font-weight: 700 !important; font-size: 0.86rem; }
+
+.variant-choice-card, #variant-picker label {
+  border-radius: var(--radius-md) !important;
+  transition: all 0.3s var(--ease-spring) !important;
+}
+
+#variant-picker label:hover {
+  border-color: var(--primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px -12px var(--primary-glow);
+}
+
+#variant-picker label:has(input:checked) {
+  border-color: var(--primary) !important;
+  background: var(--primary-light) !important;
+  box-shadow: 0 0 0 3px var(--primary-glow), 0 14px 30px -14px var(--primary-glow) !important;
+}
+
+/* ---------- 10. سبد خرید و جدول‌ها ---------- */
+#cart-table img, .cart-thumb {
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 8px 18px -8px rgba(30, 20, 6, 0.35);
+  transition: transform 0.4s var(--ease-spring);
+}
+
+#cart-table tr:hover img { transform: scale(1.12) rotate(2deg); }
+
+#cart-table tbody tr {
+  transition: background 0.25s ease;
+  border-radius: var(--radius-md);
+}
+
+#cart-table tbody tr:hover { background: var(--primary-light) !important; }
+
+.table-scroll table thead th, .table-scroll table thead td { white-space: nowrap; }
+
+/* ---------- 11. کشو، توست و اورلی‌ها ---------- */
+.cart-drawer {
+  border-radius: var(--radius-2xl) 0 0 var(--radius-2xl) !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-deep) !important;
+}
+
+.cart-drawer-overlay {
+  background: rgba(16, 12, 5, 0.55) !important;
+  backdrop-filter: blur(6px) saturate(1.2);
+}
+
+.toast {
+  border-radius: var(--radius-lg) !important;
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 22px 44px -18px rgba(30, 20, 6, 0.45) !important;
+  animation: agToastIn 0.55s var(--ease-spring) both !important;
+}
+
+@keyframes agToastIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- 12. صفحات احراز هویت: کادر سینمایی ---------- */
+.auth-page {
+  border-radius: var(--radius-2xl) !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-deep) !important;
+  border: 1px solid var(--glass-border) !important;
+}
+
+.auth-side { position: relative; overflow: hidden; background: var(--gradient-dark) !important; }
+
+.auth-side::before {
+  content: '';
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.14), transparent 65%);
+  top: -120px;
+  inset-inline-start: -120px;
+  animation: agOrbFloat 9s ease-in-out infinite;
+}
+
+.auth-side::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from 0deg at 70% 80%, transparent 0 70%, rgba(94, 234, 212, 0.12) 78%, rgba(246, 195, 82, 0.1) 86%, transparent 92%);
+  animation: agSpin 14s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes agSpin { to { transform: rotate(360deg); } }
+@keyframes agOrbFloat {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(26px, 34px); }
+}
+
+.auth-form-side { background: var(--bg-surface); }
+
+/* ---------- 13. مراحل پرداخت ---------- */
+.checkout-steps { gap: 0.6rem !important; }
+
+.checkout-steps > div {
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  transition: all 0.35s var(--ease-spring);
+}
+
+.checkout-steps > div:first-child {
+  background: var(--gradient-primary);
+  color: #fff;
+  border: none;
+  box-shadow: 0 10px 22px -8px rgba(217, 119, 6, 0.55);
+}
+
+.checkout-step-line { border-radius: 4px !important; }
+
+/* کارت‌های انتخاب در تسویه (آدرس / روش ارسال) — نور یشمی هنگام انتخاب */
+.choice-card {
+  transition: border-color 0.3s var(--ease-out-expo), box-shadow 0.3s var(--ease-out-expo), background-color 0.3s ease, transform 0.25s var(--ease-spring);
+}
+
+.choice-card:hover {
+  border-color: var(--primary) !important;
+  transform: translateY(-2px);
+}
+
+.choice-card:has(input:checked) {
+  border-color: var(--primary) !important;
+  background: var(--primary-light) !important;
+  box-shadow: 0 10px 26px -10px rgba(217, 119, 6, 0.45), inset 0 0 0 1px var(--primary);
+}
+
+/* ---------- 14. فوتر: صحنه ابسیدین ---------- */
+.site-footer {
+  background: var(--gradient-ink) !important;
+  border-top: none !important;
+  color: #CBCCD2;
+  position: relative;
+  margin-top: 4.5rem;
+}
+
+.site-footer::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  background: var(--gradient-aurora);
+  background-size: 200% 100%;
+  animation: agFlow 8s linear infinite alternate;
+}
+
+.site-footer h4 { color: #F2F2F5 !important; }
+.site-footer a { transition: all 0.25s var(--ease-spring); }
+.site-footer ul li a:hover { color: #FFD98A !important; padding-inline-start: 6px; }
+.site-footer p { color: #8fa79c; }
+
+.site-footer .form-input {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(198, 198, 208, 0.25) !important;
+  color: #F2F2F5 !important;
+}
+
+/* ---------- 15. داک شیشهای موبایل ---------- */
+.mobile-bottom-nav {
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0 !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-bottom: none;
+  box-shadow: 0 -14px 40px -14px rgba(30, 20, 6, 0.35);
+  padding-top: 0.35rem !important;
+}
+
+.mobile-bottom-nav a:active { transform: scale(0.92); }
+
+/* ---------- 16. پنل فروشندگان (admin-layout) ---------- */
+.admin-layout {
+  border-radius: var(--radius-2xl) !important;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-float);
+}
+
+.admin-sidebar {
+  background: var(--gradient-ink) !important;
+  position: relative;
+}
+
+.admin-sidebar::after {
+  content: '';
+  position: absolute;
+  inset: -50% -80%;
+  background: conic-gradient(from 180deg at 30% 30%, transparent 0 74%, rgba(255, 178, 36, 0.18) 80%, rgba(246, 195, 82, 0.12) 86%, transparent 92%);
+  animation: agSpin 16s linear infinite;
+  pointer-events: none;
+}
+
+.admin-brand { position: relative; z-index: 1; }
+
+.admin-nav-link {
+  border-radius: var(--radius-full) !important;
+  transition: all 0.3s var(--ease-spring) !important;
+}
+
+.admin-nav-link:hover {
+  transform: translateX(-4px);
+  background: rgba(255, 178, 36, 0.16) !important;
+  box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.35);
+}
+
+.admin-nav-link.active,
+.admin-nav a.active {
+  background: var(--gradient-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 24px -8px rgba(217, 119, 6, 0.6);
+}
+
+/* کارت‌های آماری داشبورد با هاور درخشان */
+.admin-main .card:hover {
+  box-shadow: var(--shadow-glow), 0 30px 60px -30px rgba(217, 119, 6, 0.35);
+}
+
+/* ---------- 17. نوار اعتماد و بج لوکس ---------- */
+.trust-bar { gap: 1rem !important; }
+
+.trust-item {
+  border-radius: var(--radius-lg) !important;
+  padding: 0.9rem 1.1rem !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 14px 30px -18px rgba(30, 20, 6, 0.25);
+  transition: all 0.35s var(--ease-spring) !important;
+}
+
+.trust-item:hover {
+  transform: translateY(-5px) scale(1.02);
+  border-color: rgba(255, 178, 36, 0.45) !important;
+  box-shadow: var(--shadow-glow);
+}
+
+.trust-icon {
+  transition: transform 0.5s var(--ease-spring) !important;
+}
+
+.trust-item:hover .trust-icon {
+  transform: translateY(-4px) rotate(-10deg) scale(1.18);
+  animation: agIconBob 1.4s ease-in-out infinite;
+}
+
+.glass-badge {
+  border-radius: var(--radius-full) !important;
+  background: linear-gradient(120deg, rgba(255, 178, 36, 0.35), rgba(255, 178, 36, 0.22) 55%, rgba(246, 195, 82, 0.3)) !important;
+  background-size: 220% 100% !important;
+  animation: agFlow 6s ease-in-out infinite alternate;
+  box-shadow: 0 12px 30px -10px rgba(217, 119, 6, 0.55) !important;
+}
+
+/* جلای CTA اصلی هیرو */
+.hero-cta {
+  animation: agCtaPulse 2.6s ease-in-out infinite;
+}
+
+@keyframes agCtaPulse {
+  0%, 100% { box-shadow: 0 12px 30px -8px rgba(200, 145, 46, 0.55); }
+  50% { box-shadow: 0 16px 44px -6px rgba(246, 195, 82, 0.8); }
+}
+
+/* ---------- 18. جزئیات پریمیوم متفرقه ---------- */
+.sticky-buy-bar {
+  border-radius: var(--radius-xl) !important;
+  margin: 0 0.75rem 0.75rem !important;
+  width: calc(100% - 1.5rem) !important;
+  backdrop-filter: var(--glass-blur);
+  box-shadow: 0 -10px 40px -12px rgba(30, 20, 6, 0.4) !important;
+}
+
+.back-to-top {
+  background: var(--gradient-primary) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px -10px rgba(217, 119, 6, 0.6) !important;
+  transition: transform 0.3s var(--ease-spring) !important;
+}
+
+.back-to-top:hover { transform: translateY(-4px) rotate(8deg); }
+
+.cookie-banner {
+  border-radius: var(--radius-xl) !important;
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-float) !important;
+}
+
+/* نور نقطه‌ای ماوس (فعال‌شده توسط premium.js روی دستگاه‌های با ماوس دقیق) */
+.ag-cursor {
+  position: fixed;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  border: 2px solid rgba(255, 178, 36, 0.6);
+  box-shadow: 0 0 22px rgba(255, 178, 36, 0.35);
+  transform: translate(-50%, -50%);
+  transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease, opacity 0.3s ease;
+  mix-blend-mode: difference;
+  opacity: 0;
+}
+
+.ag-cursor.ag-cursor-active { opacity: 1; }
+
+.ag-cursor.ag-cursor-hot {
+  width: 52px;
+  height: 52px;
+  border-color: rgba(246, 195, 82, 0.85);
+}
+
+/* اسکرول‌بار پریمیوم */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: var(--bg-subtle); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #D97706, #F59E0B, #e0932f);
+  border-radius: 10px;
+  border: 2px solid var(--bg-subtle);
+}
+
+::selection {
+  background: rgba(217, 119, 6, 0.88);
+  color: #fff;
+}
+
+/* جلای جدول مشخصات */
+.table-scroll table tr:hover td { background: var(--primary-light); }
+
+/* اعداد قیمت هم‌عرض */
+#product-price-display, #page-cart-grandtotal, .grand-total-num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+@keyframes agStarPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35) rotate(12deg); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- 19. صحنه محصول (PDP): استیج سه‌بعدی ---------- */
+.pdp-stage {
+  position: relative;
+  border-radius: var(--radius-2xl) !important;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 178, 36, 0.10), transparent 60%),
+    radial-gradient(circle at 50% 100%, var(--bg-surface-hover) 0%, var(--bg-subtle) 75%);
+  overflow: hidden;
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  transform-style: preserve-3d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 30px 60px -35px rgba(30, 20, 6, 0.45);
+}
+
+.pdp-stage::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(from 0deg, transparent 0 82%, rgba(255, 178, 36, 0.2) 88%, rgba(246, 195, 82, 0.18) 93%, transparent 98%);
+  animation: agSpin 9s linear infinite;
+  pointer-events: none;
+}
+
+.pdp-stage img {
+  transition: transform 0.65s var(--ease-out-expo), opacity 0.4s ease, filter 0.5s ease;
+  filter: drop-shadow(0 26px 30px rgba(30, 20, 6, 0.32));
+  z-index: 1;
+}
+
+.pdp-stage.pdp-zoomed img { transform: scale(1.9); cursor: zoom-out; }
+
+.pdp-stage img.pdp-swapping { opacity: 0; transform: translateX(34px) rotateY(24deg) scale(0.9); }
+
+.pdp-thumbs { display: flex; gap: 0.7rem; overflow-x: auto; padding: 0.35rem; }
+
+.pdp-thumb {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--bg-surface);
+  padding: 0.25rem;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.35s var(--ease-spring);
+  position: relative;
+}
+
+.pdp-thumb:hover { transform: translateY(-4px); border-color: var(--primary); }
+
+.pdp-thumb.active {
+  border-color: transparent;
+  background: var(--gradient-aurora);
+  padding: 2.5px;
+  box-shadow: 0 10px 24px -8px rgba(217, 119, 6, 0.55);
+}
+
+.pdp-thumb.active img { border-radius: 8px; }
+
+.pdp-thumb img { width: 100%; height: 100%; object-fit: contain; background: var(--bg-surface); border-radius: 7px; }
+
+/* پنل خرید PDP */
+.pdp-buy {
+  border-radius: var(--radius-xl) !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-glow);
+}
+
+/* شمارنده تعداد */
+.ag-qty {
+  border-radius: var(--radius-full) !important;
+  border: 1.5px solid var(--border) !important;
+  background: var(--bg-surface);
+  transition: box-shadow 0.3s ease;
+}
+
+.ag-qty:focus-within { box-shadow: 0 0 0 4px var(--primary-glow); }
+
+.ag-qty button {
+  border: none;
+  background: none;
+  width: 40px;
+  height: 100%;
+  cursor: pointer;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.ag-qty button:hover { color: var(--primary); transform: scale(1.25); }
+
+.ag-qty input {
+  width: 52px;
+  text-align: center;
+  border: none;
+  font-weight: 800;
+  background: transparent;
+  color: var(--text-primary);
+  -moz-appearance: textfield;
+}
+
+.ag-qty input::-webkit-outer-spin-button, .ag-qty input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+@keyframes agIconBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+/* شبکه‌های داخل کارت */
+.card [style*="grid-template-columns: 1fr 1fr"] > div,
+.trust-grid > div {
+  transition: all 0.35s var(--ease-spring);
+  border-radius: var(--radius-md);
+  padding: 0.35rem 0.5rem;
+}
+
+.card [style*="grid-template-columns: 1fr 1fr"] > div:hover {
+  background: var(--primary-light);
+  transform: translateY(-2px);
+}
+
+/* ---------- 20. ترنزیشن صفحه (View Transitions API) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: agVTOld 0.38s var(--ease-in-out-quint) both;
+  }
+  ::view-transition-new(root) {
+    animation: agVTNew 0.55s var(--ease-in-out-quint) both;
+  }
+}
+
+@keyframes agVTOld {
+  to { opacity: 0; transform: scale(1.035); filter: blur(6px); }
+}
+
+@keyframes agVTNew {
+  from { opacity: 0; transform: scale(0.97); filter: blur(8px); clip-path: circle(38% at 50% 55%); }
+  to   { opacity: 1; transform: scale(1); filter: blur(0); clip-path: circle(150% at 50% 55%); }
+}
+
+/* ---------- 21. انیمیشن مبتنی بر اسکرول (در صورت پشتیبانی مرورگر) ---------- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+      animation: agScrollReveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 42%;
+    }
+  }
+}
+
+@keyframes agScrollReveal {
+  from { opacity: 0; transform: translateY(34px) scale(0.985); filter: blur(3px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+/* ---------- 22. احترام به کاهش حرکت ---------- */
+@media (prefers-reduced-motion: reduce) {
+  body::before, .site-announce::after, .site-header::after, .pdp-stage::before,
+  .auth-side::after, .product-card-badge, main h1, .glass-badge, .hero-cta,
+  .wow-cube-wrap, .wow-orbit, .wow-grid-floor, .wow-shard, #wow-scroll-progress { animation: none !important; }
+  .product-card:hover, .btn:hover, .nav-link:hover { transform: none !important; }
+  * { transition-duration: 0.01ms !important; }
+}
+
+/* ---------- 23. تنظیم موبایل ---------- */
+@media (max-width: 768px) {
+  .site-header { border-radius: 0 0 22px 22px; }
+  .navbar { display: none; }
+  .pdp-stage { aspect-ratio: 4/3; }
+  main .container > section > h2 { font-size: 1.2rem; }
+  .ag-cursor { display: none; }
+}

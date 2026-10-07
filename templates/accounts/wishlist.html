@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}لیست علاقه‌مندی‌ها | {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="profile-layout">
+    
+    <!-- Account Sidebar -->
+    <aside class="card" style="padding: 1.5rem;">
+      <nav style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.92rem;">
+        <a href="{% url 'accounts:profile' %}" class="nav-link">👤 مشخصات حساب</a>
+        {% if not user.is_staff %}<a href="{% url 'accounts:order_history' %}" class="nav-link">📦 سفارش‌های من</a>
+        <a href="{% url 'accounts:address_list' %}" class="nav-link">📍 آدرس‌های من</a>
+        <a href="{% url 'accounts:wishlist' %}" class="nav-link active" style="font-weight: 700;">♥ لیست علاقه‌مندی‌ها</a>{% endif %}
+        <a href="{% url 'accounts:change_password' %}" class="nav-link">🔐 تغییر رمز عبور</a>
+        <a href="{% url 'accounts:logout' %}" class="nav-link" style="color: var(--danger); margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">🚪 خروج از حساب</a>
+      </nav>
+    </aside>
+
+    <!-- Wishlist Grid -->
+    <div class="card" style="padding: 1.75rem;">
+      <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+        محصولات مورد علاقه شما
+      </h2>
+
+      {% if wishlist_items %}
+        <div class="grid grid-cols-3">
+          {% for item in wishlist_items %}
+            <div class="product-card">
+              <a href="{{ item.product.get_absolute_url }}" class="product-card-img-wrap">
+                <img src="{{ item.product.get_primary_image }}" alt="{{ item.product.name }}" class="product-card-img" loading="lazy">
+              </a>
+              <div class="product-card-body">
+                <a href="{{ item.product.get_absolute_url }}" class="product-card-title">{{ item.product.name }}</a>
+                <div class="product-card-price-row">
+                  <div class="price-current">{{ item.product.get_effective_price|toman }} <small style="font-size: 0.75rem;">تومان</small></div>
+                  <button class="btn btn-primary btn-sm" onclick="addToCart({{ item.product.id }})">+ خرید</button>
+                </div>
+                <button onclick="toggleWishlist({{ item.product.id }}, this); this.closest('.product-card').remove();" class="btn btn-outline btn-sm" style="margin-top: 0.5rem; color: var(--danger); border-color: var(--danger);">
+                  حذف از علاقه‌مندی‌ها
+                </button>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div style="text-align: center; color: var(--text-muted); padding: 4rem 1rem;">
+          <div style="font-size: 3rem; margin-bottom: 0.75rem; color: var(--danger);">♥</div>
+          <h3 style="margin-bottom: 0.5rem;">لیست علاقه‌مندی‌های شما خالی است.</h3>
+          <p style="margin-bottom: 1.5rem; font-size: 0.95rem;">کالاهایی که دوست دارید را با کلیک روی آیکون قلب به این لیست اضافه کنید.</p>
+          <a href="{% url 'catalog:shop' %}" class="btn btn-primary">مشاهده کالاهای فروشگاه</a>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

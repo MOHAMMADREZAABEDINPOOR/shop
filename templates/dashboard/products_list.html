@@ -1,0 +1,315 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static shop_filters %}
+
+{% block title %}مدیریت محصولات فروشگاه | پنل ادمین{% endblock %}
+
+{% block dashboard_content %}
+  <div class="admin-topbar">
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.2rem;">
+        <a href="{% url 'dashboard:overview' %}" style="color: var(--primary);">داشبورد</a> / محصولات
+      </div>
+      <h1 style="font-size: 1.4rem; font-weight: 800;"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-grid"/></svg> مدیریت محصولات</h1>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">جستجو، تخفیف سریع، ویرایش قیمت و موجودی</p>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <a href="{% url 'dashboard:inventory' %}" class="btn btn-outline btn-sm">کنترل انبار</a>
+      <a href="{% url 'dashboard:product_create' %}" class="btn btn-primary btn-sm btn-shimmer">
+        + افزودن محصول
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI / Stats Summary Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="card" style="border-inline-start: 4px solid var(--primary); padding: 1.15rem;">
+      <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem;">کل محصولات ثبت‌شده</div>
+      <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">{{ total_count|default:"0" }}</div>
+    </div>
+    <div class="card" style="border-inline-start: 4px solid var(--success); padding: 1.15rem;">
+      <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem;">کالاهای موجود در انبار</div>
+      <div style="font-size: 1.5rem; font-weight: 800; color: var(--success);">{{ in_stock_count|default:"0" }}</div>
+    </div>
+    <div class="card" style="border-inline-start: 4px solid var(--danger); padding: 1.15rem;">
+      <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem;">محصولات دارای تخفیف شگفت‌انگیز</div>
+      <div style="font-size: 1.5rem; font-weight: 800; color: var(--danger);">{{ discounted_count|default:"0" }}</div>
+    </div>
+    <div class="card" style="border-inline-start: 4px solid var(--warning); padding: 1.15rem;">
+      <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem;">کالاهای ناموجود</div>
+      <div style="font-size: 1.5rem; font-weight: 800; color: var(--warning);">{{ out_of_stock_count|default:"0" }}</div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="card">
+    <form method="GET" action="{% url 'dashboard:products' %}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; align-items: flex-end;">
+      
+      <!-- Search Input -->
+      <div>
+        <label style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">جستجوی عنوان کالا یا SKU:</label>
+        <input type="text" name="q" value="{{ q|default:'' }}" class="form-input" placeholder="مثال: آیفون، مک‌بوک، SKU-..." style="padding: 0.5rem 0.75rem; font-size: 0.88rem; width: 100%;">
+      </div>
+
+      <!-- Category Filter -->
+      <div>
+        <label style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">دسته‌بندی:</label>
+        <select name="category" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.88rem; width: 100%;">
+          <option value="">همه دسته‌ها</option>
+          {% for c in categories %}
+            <option value="{{ c.slug }}" {% if category_slug == c.slug %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Brand Filter -->
+      <div>
+        <label style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">برند:</label>
+        <select name="brand" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.88rem; width: 100%;">
+          <option value="">همه برندها</option>
+          {% for b in brands %}
+            <option value="{{ b.slug }}" {% if brand_slug == b.slug %}selected{% endif %}>{{ b.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Stock Status -->
+      <div>
+        <label style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">وضعیت انبار:</label>
+        <select name="stock_status" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.88rem; width: 100%;">
+          <option value="">همه</option>
+          <option value="in_stock" {% if stock_status == 'in_stock' %}selected{% endif %}>موجود (> ۵)</option>
+          <option value="low_stock" {% if stock_status == 'low_stock' %}selected{% endif %}>موجودی اندک (۱ تا ۵)</option>
+          <option value="out_of_stock" {% if stock_status == 'out_of_stock' %}selected{% endif %}>ناموجود (۰)</option>
+        </select>
+      </div>
+
+      <!-- Discount Filter -->
+      <div>
+        <label style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">تخفیف:</label>
+        <select name="discount" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.88rem; width: 100%;">
+          <option value="">همه</option>
+          <option value="yes" {% if discount_filter == 'yes' %}selected{% endif %}>دارای تخفیف</option>
+          <option value="no" {% if discount_filter == 'no' %}selected{% endif %}>بدون تخفیف</option>
+        </select>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 0.5rem;">
+        <button type="submit" class="btn btn-primary btn-sm" style="padding-inline: 1rem;">
+          اعمال فیلتر
+        </button>
+        {% if q or category_slug or brand_slug or stock_status or discount_filter %}
+          <a href="{% url 'dashboard:products' %}" class="btn btn-outline btn-sm" title="پاک‌سازی فیلترها">
+            ✕
+          </a>
+        {% endif %}
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Products Data Table -->
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <div class="table-wrap" style="border:none; border-radius:0;">
+      <table class="table-admin">
+        <thead>
+          <tr>
+            <th style="padding: 0.85rem 1rem; width: 60px;">تصویر</th>
+            <th style="padding: 0.85rem 1rem;">نام محصول و شناسه کالا</th>
+            <th style="padding: 0.85rem 1rem;">دسته‌بندی / برند</th>
+            <th style="padding: 0.85rem 1rem;">قیمت پایه (تومان)</th>
+            <th style="padding: 0.85rem 1rem;">قیمت فروش / تخفیف</th>
+            <th style="padding: 0.85rem 1rem;">موجودی</th>
+            <th style="padding: 0.85rem 1rem;">وضعیت</th>
+            <th style="padding: 0.85rem 1rem; text-align: center;">عملیات مدیر</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in page_obj %}
+            <tr style="border-bottom: 1px solid var(--border); transition: background-color 0.15s ease;">
+              <!-- Image Thumbnail -->
+              <td style="padding: 0.75rem 1rem;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-subtle); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <img src="{{ product.get_primary_image }}" alt="{{ product.name }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                </div>
+              </td>
+
+              <!-- Name & SKU -->
+              <td style="padding: 0.75rem 1rem;">
+                <a href="{{ product.get_absolute_url }}" target="_blank" style="font-weight: 700; color: var(--text-primary); text-decoration: none; display: block; max-width: 320px; line-height: 1.4;">
+                  {{ product.name }}
+                </a>
+                <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
+                  {{ product.sku }}
+                </span>
+              </td>
+
+              <!-- Category & Brand -->
+              <td style="padding: 0.75rem 1rem;">
+                <div>{{ product.category.name }}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">{{ product.brand.name|default:"-" }}</div>
+              </td>
+
+              <!-- Base Price -->
+              <td style="padding: 0.75rem 1rem; font-weight: 600;">
+                {{ product.base_price|toman }}
+              </td>
+
+              <!-- Sale Price & Discount Badge -->
+              <td style="padding: 0.75rem 1rem;">
+                {% if product.sale_price and product.sale_price < product.base_price %}
+                  <div style="color: var(--danger); font-weight: 700;">{{ product.sale_price|toman }}</div>
+                  <span class="badge badge-danger" style="font-size: 0.72rem; padding: 0.15rem 0.4rem;">
+                    {{ product.discount_percent }}% تخفیف
+                  </span>
+                {% else %}
+                  <span style="color: var(--text-muted); font-size: 0.8rem;">بدون تخفیف</span>
+                {% endif %}
+              </td>
+
+              <!-- Stock -->
+              <td style="padding: 0.75rem 1rem;">
+                {% if product.stock > 5 %}
+                  <span style="color: var(--success); font-weight: 700;">{{ product.stock }} عدد</span>
+                {% elif product.stock > 0 %}
+                  <span style="color: var(--warning); font-weight: 700;">{{ product.stock }} عدد (محدود)</span>
+                {% else %}
+                  <span style="color: var(--danger); font-weight: 700;">ناموجود (۰)</span>
+                {% endif %}
+              </td>
+
+              <!-- Status -->
+              <td style="padding: 0.75rem 1rem;">
+                <form action="{% url 'dashboard:product_toggle' product.id %}" method="POST" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" style="background:none; border:none; cursor:pointer; padding:0;">
+                    {% if product.is_active %}
+                      <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: var(--radius-full); background: var(--success-light); color: var(--success); font-size: 0.75rem; font-weight: 700;">
+                        ✓ فعال
+                      </span>
+                    {% else %}
+                      <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: var(--radius-full); background: var(--danger-light); color: var(--danger); font-size: 0.75rem; font-weight: 700;">
+                        ✕ غیرفعال
+                      </span>
+                    {% endif %}
+                  </button>
+                </form>
+              </td>
+
+              <!-- Actions -->
+              <td style="padding: 0.75rem 1rem; text-align: center;">
+                <div style="display: flex; gap: 0.4rem; justify-content: center; align-items: center;">
+                  <!-- Quick Discount Trigger -->
+                  <button type="button" class="btn btn-outline btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="openDiscountModal('{{ product.id }}', '{{ product.name|escapejs }}', '{{ product.base_price|toman }}', '{{ product.discount_percent|default:0 }}')" title="تنظیم سریع تخفیف">
+                    <svg class="icon icon-lg" aria-hidden="true"><use href="#i-tag"/></svg> تخفیف
+                  </button>
+
+                  <!-- Edit -->
+                  <a href="{% url 'dashboard:product_edit' product.id %}" class="btn btn-outline btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" title="ویرایش کالا">
+                    <svg class="icon icon-lg" aria-hidden="true"><use href="#i-edit"/></svg>
+                  </a>
+
+                  <!-- Delete -->
+                  <form action="{% url 'dashboard:product_delete' product.id %}" method="POST" style="display: inline;" onsubmit="return confirm('آیا از حذف کامل محصول «{{ product.name|escapejs }}» مطمئن هستید؟');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger); border-color: var(--danger-light);" title="حذف کالا">
+                      <svg class="icon icon-lg" aria-hidden="true"><use href="#i-trash"/></svg>️
+                    </button>
+                  </form>
+                </div>
+              </td>
+
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                هیچ محصولی با فیلترهای مشخص‌شده یافت نشد.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination Controls -->
+  {% if page_obj.has_other_pages %}
+    <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-bottom: 3rem;">
+      {% if page_obj.has_previous %}
+        <a href="?page=1{% if q %}&q={{ q }}{% endif %}{% if category_slug %}&category={{ category_slug }}{% endif %}{% if brand_slug %}&brand={{ brand_slug }}{% endif %}{% if stock_status %}&stock_status={{ stock_status }}{% endif %}{% if discount_filter %}&discount={{ discount_filter }}{% endif %}" class="btn btn-outline btn-sm">
+          « اولین صفحه
+        </a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if category_slug %}&category={{ category_slug }}{% endif %}{% if brand_slug %}&brand={{ brand_slug }}{% endif %}{% if stock_status %}&stock_status={{ stock_status }}{% endif %}{% if discount_filter %}&discount={{ discount_filter }}{% endif %}" class="btn btn-outline btn-sm">
+          قبلی
+        </a>
+      {% endif %}
+
+      <span style="font-size: 0.9rem; font-weight: 700; padding: 0.35rem 0.85rem; background: var(--bg-surface-hover); border-radius: var(--radius-sm);">
+        صفحه {{ page_obj.number }} از {{ page_obj.paginator.num_pages }}
+      </span>
+
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if category_slug %}&category={{ category_slug }}{% endif %}{% if brand_slug %}&brand={{ brand_slug }}{% endif %}{% if stock_status %}&stock_status={{ stock_status }}{% endif %}{% if discount_filter %}&discount={{ discount_filter }}{% endif %}" class="btn btn-outline btn-sm">
+          بعدی
+        </a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if category_slug %}&category={{ category_slug }}{% endif %}{% if brand_slug %}&brand={{ brand_slug }}{% endif %}{% if stock_status %}&stock_status={{ stock_status }}{% endif %}{% if discount_filter %}&discount={{ discount_filter }}{% endif %}" class="btn btn-outline btn-sm">
+          آخرین صفحه »
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+<!-- Quick Discount Modal -->
+<div id="discountModal" class="discount-modal-overlay" style="display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
+  <div class="card" style="width: 100%; max-width: 440px; padding: 2rem; position: relative;">
+    <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span><svg class="icon icon-lg" aria-hidden="true"><use href="#i-tag"/></svg></span> تنظیم سریع تخفیف محصول
+    </h3>
+    <p id="modalProductName" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;"></p>
+
+    <form id="discountForm" method="POST" action="">
+      {% csrf_token %}
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">درصد تخفیف (مثلاً ۱۰، ۲۰، ۳۵ یا ۰ برای حذف تخفیف):</label>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="number" id="discountPercentInput" name="discount_percent" min="0" max="95" class="form-input" placeholder="درصد تخفیف" style="flex: 1; padding: 0.6rem;">
+          <span style="font-weight: 700;">٪</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeDiscountModal()">انصراف</button>
+        <button type="submit" class="btn btn-primary btn-sm btn-shimmer" style="font-weight: 700;">ثبت و ذخیره تخفیف</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openDiscountModal(productId, productName, basePrice, currentDiscount) {
+  const modal = document.getElementById('discountModal');
+  const form = document.getElementById('discountForm');
+  const nameEl = document.getElementById('modalProductName');
+  const inputEl = document.getElementById('discountPercentInput');
+
+  form.action = `/dashboard/products/${productId}/discount/`;
+  nameEl.innerText = `${productName} (قیمت پایه: ${basePrice} تومان)`;
+  inputEl.value = currentDiscount > 0 ? currentDiscount : '';
+  
+  modal.style.display = 'flex';
+}
+
+function closeDiscountModal() {
+  document.getElementById('discountModal').style.display = 'none';
+}
+
+window.addEventListener('click', function(e) {
+  const modal = document.getElementById('discountModal');
+  if (e.target === modal) {
+    closeDiscountModal();
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}{{ site_settings.site_name|tr:request.LANGUAGE_CODE }} | {% tr 'Safe, fast, and enjoyable shopping for digital goods and home appliances; with authenticity guarantee and nationwide delivery.' %}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- 1. HERO — cinematic depth stage -->
+  <section>
+    {% if hero_banners %}
+      {% with hero=hero_banners.first %}
+        <div class="em-hero">
+          <div class="em-hero-grid">
+
+            <div>
+              <span class="em-hero-eyebrow" data-em-rise style="--d:.05s">
+                <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>
+                {% tr 'A Different Shopping Experience' %}
+              </span>
+
+              <h1 class="em-hero-title" data-em-rise style="--d:.12s">{{ hero.title|tr:request.LANGUAGE_CODE }}</h1>
+
+              <p class="em-hero-sub" data-em-rise style="--d:.2s">{{ hero.subtitle|tr:request.LANGUAGE_CODE }}</p>
+
+              <ul class="em-hero-points" data-em-rise style="--d:.28s">
+                <li><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg> {% tr 'Fast delivery in Tehran and nationwide' %}</li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> {% tr 'Authenticity Guaranteed' %}</li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-card"/></svg> {% tr 'Secure payment with banking gateway' %}</li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-headset"/></svg> {% tr '24/7 Support' %}</li>
+              </ul>
+
+              <div class="em-hero-ctas" data-em-rise style="--d:.36s">
+                <a href="{{ hero.link_url }}" class="btn btn-primary btn-lg btn-shimmer">
+                  {{ hero.button_text|tr:request.LANGUAGE_CODE }}
+                  <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg>
+                </a>
+                <a href="{% url 'catalog:shop' %}?discount=1" class="btn btn-ghost btn-lg">{% tr 'View Special Discounts' %}</a>
+              </div>
+            </div>
+
+            <div class="em-hero-stage" aria-hidden="true">
+              <div class="em-hero-glow" data-depth="0.5"></div>
+              <div class="em-hero-floor" data-depth="0.55"></div>
+              <div class="em-ring-wrap" data-depth="0.8"><div class="em-hero-ring"></div></div>
+
+              {% if hero.image %}
+                <div class="em-hero-float" data-depth="1.2">
+                  <div class="em-hero-product">
+                    <img src="{{ hero.image.url }}" alt="{{ hero.title|tr:request.LANGUAGE_CODE }}" fetchpriority="high">
+                  </div>
+                </div>
+              {% endif %}
+
+              <div class="em-chip-wrap chip-a" data-depth="1.5">
+                <span class="em-hero-chip"><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg> {% tr 'Express Shipping' %}</span>
+              </div>
+              <div class="em-chip-wrap chip-b" data-depth="1.7">
+                <span class="em-hero-chip"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> {% tr 'Authenticity Guarantee' %}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {% endwith %}
+    {% else %}
+      <div class="em-hero">
+        <div class="em-hero-grid" style="grid-template-columns: 1fr;">
+          <div style="max-width: 640px;">
+            <span class="em-hero-eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> {{ site_settings.site_tagline|default:"Modern Online Store"|tr:request.LANGUAGE_CODE }}</span>
+            <h1 class="em-hero-title">{% tr 'Welcome to our store' %}</h1>
+            <p class="em-hero-sub">{% tr 'Safe, fast, and enjoyable shopping for digital goods and home appliances; with authenticity guarantee and nationwide delivery.' %}</p>
+            <div class="em-hero-ctas">
+              <a href="{% url 'catalog:shop' %}" class="btn btn-primary btn-lg btn-shimmer">
+                {% tr 'Start Shopping' %}
+                <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- 2. Services strip -->
+  <section class="em-services reveal" aria-label="{% tr 'Store Services' %}">
+    <div class="em-service">
+      <span class="em-service-icon"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-truck"/></svg></span>
+      <div>
+        <div class="em-service-title">{% tr 'Fast & Reliable Delivery' %}</div>
+        <div class="em-service-sub">{% tr 'Express Tehran, nationwide delivery' %}</div>
+      </div>
+    </div>
+    <div class="em-service">
+      <span class="em-service-icon"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-shield"/></svg></span>
+      <div>
+        <div class="em-service-title">{% tr 'Authenticity Guaranteed' %}</div>
+        <div class="em-service-sub">{% tr '100% genuine & verified products' %}</div>
+      </div>
+    </div>
+    <div class="em-service">
+      <span class="em-service-icon"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-card"/></svg></span>
+      <div>
+        <div class="em-service-title">{% tr 'Secure Payment' %}</div>
+        <div class="em-service-sub">{% tr 'Certified banking gateway with OTP' %}</div>
+      </div>
+    </div>
+    <div class="em-service">
+      <span class="em-service-icon"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-headset"/></svg></span>
+      <div>
+        <div class="em-service-title">{% tr '24/7 Support' %}</div>
+        <div class="em-service-sub">{% tr '24/7 Customer Care' %}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Categories -->
+  <section class="reveal em-block">
+    <div class="section-head flex justify-between items-center" style="margin-bottom: 1.4rem;">
+      <div>
+        <span class="section-eyebrow">{% tr 'Shop by Category' %}</span>
+        <h2 style="font-size: clamp(1.3rem, 2.6vw, 1.7rem);">{% tr 'Popular Categories' %}</h2>
+      </div>
+      <a href="{% url 'catalog:shop' %}" class="btn btn-outline btn-sm">{% tr 'All Categories' %} <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg></a>
+    </div>
+    <div class="em-cats">
+      {% for cat in categories %}
+        <a href="{% url 'catalog:shop' %}?category={{ cat.slug }}" class="em-cat">
+          <span class="em-cat-icon"><svg class="icon icon-xl" aria-hidden="true"><use href="#i-grid"/></svg></span>
+          <span class="em-cat-name">{{ cat.name|tr:request.LANGUAGE_CODE }}</span>
+          <span class="em-cat-more">{% tr 'View Products' %} <svg class="icon" style="width:.85em;height:.85em" aria-hidden="true"><use href="#i-arrow-start"/></svg></span>
+        </a>
+      {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 1rem;">{% tr 'Categories not added yet.' %}</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- 4. Deals of the day -->
+  {% if discounted_products %}
+  <section class="em-deals reveal em-block">
+    <div class="em-deals-head">
+      <div>
+        <div class="em-deals-title"><svg class="icon icon-lg" style="color:#FFC24B" aria-hidden="true"><use href="#i-spark"/></svg> {% tr "Today's Hot Deals" %}</div>
+        <div class="em-deals-sub">{% tr "Limited discounts on selected popular products; act before time runs out." %}</div>
+        <span class="countdown-chip" data-countdown-minutes="320" style="margin-top:.65rem">
+          <svg class="icon" style="width:.95em;height:.95em" aria-hidden="true"><use href="#i-clock"/></svg>
+          <span data-countdown-value>--:--:--</span>
+        </span>
+      </div>
+      <a href="{% url 'catalog:shop' %}?discount=1" class="btn btn-primary btn-sm">{% tr 'All Offers' %} <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg></a>
+    </div>
+
+    <div class="grid grid-cols-4 em-deals-grid">
+      {% for product in discounted_products %}
+        <div class="product-card">
+          <a href="{{ product.get_absolute_url }}" class="product-card-img-wrap">
+            <img src="{{ product.get_primary_image }}" alt="{{ product.name|tr:request.LANGUAGE_CODE }}" class="product-card-img" loading="lazy">
+            <span class="product-card-badge">{{ product.calculate_discount_percent|num:request.LANGUAGE_CODE }}% {% tr 'Off' %}</span>
+            <div class="product-card-actions">
+              <button type="button" class="product-card-action-btn" title="{% tr 'Add to Cart' %}" aria-label="{% tr 'Add to Cart' %}" onclick="event.preventDefault(); addToCart({{ product.id }});">
+                <svg class="icon" aria-hidden="true"><use href="#i-cart"/></svg>
+              </button>
+              <button type="button" class="product-card-action-btn" title="{% tr 'Wishlist' %}" aria-label="{% tr 'Wishlist' %}" onclick="event.preventDefault(); toggleWishlist({{ product.id }}, this);">
+                <svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg>
+              </button>
+            </div>
+          </a>
+          <div class="product-card-body">
+            <div class="pc-badges">{% for kind, label in product.marketing_badges %}<span class="badge badge-market badge-{{ kind }}">{{ label|tr:request.LANGUAGE_CODE }}</span>{% endfor %}</div>
+            
+            <span style="font-size:.78rem;color:var(--text-muted);font-weight:600;">{{ product.category.name|tr:request.LANGUAGE_CODE }}</span>
+            <a href="{{ product.get_absolute_url }}" class="product-card-title" title="{{ product.name|tr:request.LANGUAGE_CODE }}">{{ product.name|tr:request.LANGUAGE_CODE }}</a>
+            <div class="product-card-price-row">
+              <div>
+                <div class="price-old">{{ product.base_price|toman:request.LANGUAGE_CODE }}</div>
+                <div class="price-current">{{ product.sale_price|toman:request.LANGUAGE_CODE }} <small style="font-size:.72rem;font-weight:600;color:var(--text-muted)">{% tr 'Toman' %}</small></div>
+              </div>
+              <button class="btn btn-primary btn-sm" type="button" onclick="addToCart({{ product.id }})">
+                <svg class="icon" style="width:.9em;height:.9em" aria-hidden="true"><use href="#i-plus"/></svg> {% tr 'Add' %}
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- 5. Editorial statement -->
+  <section class="reveal em-block" style="text-align: center; padding-block: 2.1rem; border-block: 1px solid var(--border);">
+    <h2 class="em-section-title" style="font-size: clamp(1.2rem, 2.5vw, 1.7rem); line-height: 1.9; max-width: 840px; margin-inline: auto;">
+      {% tr "Why buy from us? Thousands shop with confidence every day: from genuine warranty to fast delivery, everything for a seamless experience." %}
+    </h2>
+    <div style="display: flex; justify-content: center; gap: 1.4rem; margin-top: 1.2rem; font-size: 0.84rem; font-weight: 700; color: var(--text-muted); flex-wrap: wrap;">
+      <span>{% tr '7-Day Return Guarantee' %}</span>
+      <span aria-hidden="true" style="color: var(--primary);">◆</span>
+      <span>{% tr 'Express Shipping' %}</span>
+      <span aria-hidden="true" style="color: var(--accent);">◆</span>
+      <span>{% tr 'Secure Payment' %}</span>
+    </div>
+  </section>
+
+  <!-- 6. Dual promotional banners -->
+  <section class="reveal em-block" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 1.4rem;">
+    {% if dual_banner_1 %}
+      <a href="{{ dual_banner_1.link_url }}" class="em-banner">
+        {% if dual_banner_1.image %}<img src="{{ dual_banner_1.image.url }}" alt="{{ dual_banner_1.title|tr:request.LANGUAGE_CODE }}" class="em-banner-bg" loading="lazy">{% endif %}
+        <div class="em-banner-content">
+          <h3 class="em-banner-title">{{ dual_banner_1.title|tr:request.LANGUAGE_CODE }}</h3>
+          <p class="em-banner-sub">{{ dual_banner_1.subtitle|tr:request.LANGUAGE_CODE }}</p>
+          <span class="em-banner-cta">{{ dual_banner_1.button_text|tr:request.LANGUAGE_CODE }} <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg></span>
+        </div>
+      </a>
+    {% endif %}
+    {% if dual_banner_2 %}
+      <a href="{{ dual_banner_2.link_url }}" class="em-banner">
+        {% if dual_banner_2.image %}<img src="{{ dual_banner_2.image.url }}" alt="{{ dual_banner_2.title|tr:request.LANGUAGE_CODE }}" class="em-banner-bg" loading="lazy">{% endif %}
+        <div class="em-banner-content">
+          <h3 class="em-banner-title">{{ dual_banner_2.title|tr:request.LANGUAGE_CODE }}</h3>
+          <p class="em-banner-sub">{{ dual_banner_2.subtitle|tr:request.LANGUAGE_CODE }}</p>
+          <span class="em-banner-cta">{{ dual_banner_2.button_text|tr:request.LANGUAGE_CODE }} <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg></span>
+        </div>
+      </a>
+    {% endif %}
+  </section>
+
+  <!-- 7. Featured products -->
+  <section class="reveal em-block">
+    <div class="section-head flex justify-between items-center" style="margin-bottom: 1.4rem;">
+      <div>
+        <span class="section-eyebrow">{% tr "Editor's Choice" %}</span>
+        <h2 style="font-size: clamp(1.3rem, 2.6vw, 1.7rem);">{% tr 'Store Highlights' %}</h2>
+        <p style="font-size: .85rem; color: var(--text-muted); margin-top: .2rem;">{% tr 'Products that are most popular and offer great value.' %}</p>
+      </div>
+      <a href="{% url 'catalog:shop' %}" class="btn btn-outline btn-sm">{% tr 'All Products' %} <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg></a>
+    </div>
+
+    <div class="grid grid-cols-4">
+      {% for product in featured_products %}
+        <div class="product-card">
+          <a href="{{ product.get_absolute_url }}" class="product-card-img-wrap">
+            <img src="{{ product.get_primary_image }}" alt="{{ product.name|tr:request.LANGUAGE_CODE }}" class="product-card-img" loading="lazy">
+            {% if product.has_discount %}<span class="product-card-badge">{{ product.calculate_discount_percent|num:request.LANGUAGE_CODE }}% {% tr 'Off' %}</span>{% endif %}
+            <div class="product-card-actions">
+              <button type="button" class="product-card-action-btn" title="{% tr 'Add to Cart' %}" aria-label="{% tr 'Add to Cart' %}" onclick="event.preventDefault(); addToCart({{ product.id }});">
+                <svg class="icon" aria-hidden="true"><use href="#i-cart"/></svg>
+              </button>
+              <button type="button" class="product-card-action-btn" title="{% tr 'Wishlist' %}" aria-label="{% tr 'Wishlist' %}" onclick="event.preventDefault(); toggleWishlist({{ product.id }}, this);">
+                <svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg>
+              </button>
+            </div>
+          </a>
+          <div class="product-card-body">
+            <div class="pc-badges">{% for kind, label in product.marketing_badges %}<span class="badge badge-market badge-{{ kind }}">{{ label|tr:request.LANGUAGE_CODE }}</span>{% endfor %}</div>
+            
+            <div class="flex justify-between items-center">
+              <span style="font-size:.78rem;color:var(--text-muted);font-weight:600;">{{ product.category.name|tr:request.LANGUAGE_CODE }}</span>
+              <span style="display:flex;align-items:center;gap:.25rem;font-size:.78rem;font-weight:800;color:var(--text-secondary);">
+                <svg class="icon" style="fill:#F0A500;stroke:none;width:.95em;height:.95em" aria-hidden="true"><use href="#i-star"/></svg>
+                {{ product.get_average_rating|default:"5.0"|num:request.LANGUAGE_CODE }}
+              </span>
+            </div>
+            <a href="{{ product.get_absolute_url }}" class="product-card-title" title="{{ product.name|tr:request.LANGUAGE_CODE }}">{{ product.name|tr:request.LANGUAGE_CODE }}</a>
+            <div class="product-card-price-row">
+              <div>
+                {% if product.has_discount %}<div class="price-old">{{ product.base_price|toman:request.LANGUAGE_CODE }}</div>{% endif %}
+                <div class="price-current">{{ product.get_effective_price|toman:request.LANGUAGE_CODE }} <small style="font-size:.72rem;font-weight:600;color:var(--text-muted)">{% tr 'Toman' %}</small></div>
+              </div>
+              <button class="btn btn-primary btn-sm" type="button" onclick="addToCart({{ product.id }})">
+                <svg class="icon" style="width:.9em;height:.9em" aria-hidden="true"><use href="#i-plus"/></svg> {% tr 'Add' %}
+              </button>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">{% tr 'No products to display.' %}</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- 8. Special offer wide banner -->
+  {% if special_banner %}
+    <section class="reveal em-block">
+      <a href="{{ special_banner.link_url }}" class="em-banner" style="min-height: 300px;">
+        {% if special_banner.image %}<img src="{{ special_banner.image.url }}" alt="{{ special_banner.title|tr:request.LANGUAGE_CODE }}" class="em-banner-bg" loading="lazy">{% endif %}
+        <div class="em-banner-content" style="max-width: 700px; min-height: 300px;">
+          <h2 class="em-banner-title" style="font-size: clamp(1.3rem, 2.6vw, 1.9rem);">{{ special_banner.title|tr:request.LANGUAGE_CODE }}</h2>
+          <p class="em-banner-sub" style="font-size: 1rem;">{{ special_banner.subtitle|tr:request.LANGUAGE_CODE }}</p>
+          <span class="em-banner-cta" style="font-size: .95rem;">{{ special_banner.button_text|tr:request.LANGUAGE_CODE }} <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg></span>
+        </div>
+      </a>
+    </section>
+  {% endif %}
+
+  <!-- 9. Best sellers -->
+  {% if bestseller_products %}
+  <section class="reveal em-block">
+    <div class="section-head flex justify-between items-center" style="margin-bottom: 1.4rem;">
+      <div>
+        <span class="section-eyebrow">{% tr 'Best Sellers' %}</span>
+        <h2 style="font-size: clamp(1.3rem, 2.6vw, 1.7rem);">{% tr "Customers' Most Popular Choices" %}</h2>
+      </div>
+      <a href="{% url 'catalog:shop' %}?sort=popular" class="btn btn-outline btn-sm">{% tr 'View Best Sellers' %} <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg></a>
+    </div>
+
+    <div class="grid grid-cols-4">
+      {% for product in bestseller_products %}
+        <div class="product-card">
+          <a href="{{ product.get_absolute_url }}" class="product-card-img-wrap">
+            <img src="{{ product.get_primary_image }}" alt="{{ product.name|tr:request.LANGUAGE_CODE }}" class="product-card-img" loading="lazy">
+            {% if product.has_discount %}<span class="product-card-badge">{{ product.calculate_discount_percent|num:request.LANGUAGE_CODE }}% {% tr 'Off' %}</span>{% endif %}
+            <div class="product-card-actions">
+              <button type="button" class="product-card-action-btn" title="{% tr 'Add to Cart' %}" aria-label="{% tr 'Add to Cart' %}" onclick="event.preventDefault(); addToCart({{ product.id }});">
+                <svg class="icon" aria-hidden="true"><use href="#i-cart"/></svg>
+              </button>
+              <button type="button" class="product-card-action-btn" title="{% tr 'Wishlist' %}" aria-label="{% tr 'Wishlist' %}" onclick="event.preventDefault(); toggleWishlist({{ product.id }}, this);">
+                <svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg>
+              </button>
+            </div>
+          </a>
+          <div class="product-card-body">
+            <div class="pc-badges">{% for kind, label in product.marketing_badges %}<span class="badge badge-market badge-{{ kind }}">{{ label|tr:request.LANGUAGE_CODE }}</span>{% endfor %}</div>
+            
+            <div class="flex justify-between items-center">
+              <span style="font-size:.78rem;color:var(--text-muted);font-weight:600;">{{ product.category.name|tr:request.LANGUAGE_CODE }}</span>
+              <span style="display:flex;align-items:center;gap:.25rem;font-size:.78rem;font-weight:800;color:var(--text-secondary);">
+                <svg class="icon" style="fill:#F0A500;stroke:none;width:.95em;height:.95em" aria-hidden="true"><use href="#i-star"/></svg>
+                {{ product.get_average_rating|default:"5.0"|num:request.LANGUAGE_CODE }}
+              </span>
+            </div>
+            <a href="{{ product.get_absolute_url }}" class="product-card-title" title="{{ product.name|tr:request.LANGUAGE_CODE }}">{{ product.name|tr:request.LANGUAGE_CODE }}</a>
+            <div class="product-card-price-row">
+              <div>
+                {% if product.has_discount %}<div class="price-old">{{ product.base_price|toman:request.LANGUAGE_CODE }}</div>{% endif %}
+                <div class="price-current">{{ product.get_effective_price|toman:request.LANGUAGE_CODE }} <small style="font-size:.72rem;font-weight:600;color:var(--text-muted)">{% tr 'Toman' %}</small></div>
+              </div>
+              <button class="btn btn-primary btn-sm" type="button" onclick="addToCart({{ product.id }})">
+                <svg class="icon" style="width:.9em;height:.9em" aria-hidden="true"><use href="#i-plus"/></svg> {% tr 'Add' %}
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- 10. New arrivals -->
+  {% if new_products %}
+  <section class="reveal em-block">
+    <div class="section-head flex justify-between items-center" style="margin-bottom: 1.4rem;">
+      <div>
+        <span class="section-eyebrow">{% tr 'New Arrivals' %}</span>
+        <h2 style="font-size: clamp(1.3rem, 2.6vw, 1.7rem);">{% tr 'Newest Products' %}</h2>
+      </div>
+      <a href="{% url 'catalog:shop' %}?sort=newest" class="btn btn-outline btn-sm">{% tr 'View Newest' %} <svg class="icon" aria-hidden="true"><use href="#i-arrow-start"/></svg></a>
+    </div>
+
+    <div class="grid grid-cols-4">
+      {% for product in new_products %}
+        <div class="product-card">
+          <a href="{{ product.get_absolute_url }}" class="product-card-img-wrap">
+            <img src="{{ product.get_primary_image }}" alt="{{ product.name }}" class="product-card-img" loading="lazy">
+            
+            <div class="product-card-actions">
+              <button type="button" class="product-card-action-btn" title="{% tr 'Add to Cart' %}" aria-label="{% tr 'Add to Cart' %}" onclick="event.preventDefault(); addToCart({{ product.id }});">
+                <svg class="icon" aria-hidden="true"><use href="#i-cart"/></svg>
+              </button>
+              <button type="button" class="product-card-action-btn" title="{% tr 'Wishlist' %}" aria-label="{% tr 'Add to Wishlist' %}" onclick="event.preventDefault(); toggleWishlist({{ product.id }}, this);">
+                <svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg>
+              </button>
+            </div>
+          </a>
+          <div class="product-card-body">
+            <div class="pc-badges">{% for kind, label in product.marketing_badges %}<span class="badge badge-market badge-{{ kind }}">{{ label|tr:request.LANGUAGE_CODE }}</span>{% endfor %}</div>
+            
+            <span style="font-size:.78rem;color:var(--text-muted);font-weight:600;">{{ product.category.name|tr:request.LANGUAGE_CODE }}</span>
+            <a href="{{ product.get_absolute_url }}" class="product-card-title" title="{{ product.name|tr:request.LANGUAGE_CODE }}">{{ product.name|tr:request.LANGUAGE_CODE }}</a>
+            <div class="product-card-price-row">
+              <div>
+                <div class="price-current">{{ product.get_effective_price|toman:request.LANGUAGE_CODE }} <small style="font-size:.72rem;font-weight:600;color:var(--text-muted)">{% tr 'Currency Toman' %}</small></div>
+              </div>
+              <button class="btn btn-primary btn-sm" type="button" onclick="addToCart({{ product.id }})">
+                <svg class="icon" style="width:.9em;height:.9em" aria-hidden="true"><use href="#i-plus"/></svg> {% tr 'Add' %}
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- 11. Brands marquee -->
+  {% if brands %}
+    <div class="marquee reveal em-block" aria-hidden="true">
+      <div class="marquee-track">
+        {% for brand in brands %}<span class="marquee-item">{{ brand.name|tr:request.LANGUAGE_CODE }}</span>{% endfor %}
+        {% for brand in brands %}<span class="marquee-item">{{ brand.name|tr:request.LANGUAGE_CODE }}</span>{% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- 12. Brands grid -->
+  {% if brands %}
+  <section class="reveal em-block">
+    <div class="section-head" style="margin-bottom: 1.3rem;">
+      <span class="section-eyebrow">{% tr 'Trusted Brands' %}</span>
+      <h2 style="font-size: clamp(1.3rem, 2.6vw, 1.7rem);">{% tr 'Shop Brands You Know' %}</h2>
+      <p style="font-size: .85rem; color: var(--text-muted); margin-top: .2rem;">{% tr 'Direct partnership with world-renowned brands.' %}</p>
+    </div>
+    <div class="em-brands">
+      {% for brand in brands %}
+        <a href="{% url 'catalog:shop' %}?brand={{ brand.slug }}" class="em-brand">
+          <svg class="icon" style="color:var(--primary)" aria-hidden="true"><use href="#i-tag"/></svg>
+          {{ brand.name|tr:request.LANGUAGE_CODE }}
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- 13. Testimonials -->
+  {% if testimonials %}
+  <section class="reveal em-block">
+    <div class="section-head" style="text-align: center; margin-bottom: 1.6rem;">
+      <span class="section-eyebrow" style="justify-content: center;">{% tr 'Customer Satisfaction' %}</span>
+      <h2 style="font-size: clamp(1.3rem, 2.6vw, 1.7rem);">{% tr 'What Customers Say' %}</h2>
+    </div>
+    <div class="em-quotes">
+      {% for rev in testimonials %}
+        <div class="em-quote">
+          <div class="em-quote-stars" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Rating {{ rev.rating }} of 5{% else %}امتیاز {{ rev.rating }} از ۵{% endif %}">
+            {% for i in "12345" %}{% if forloop.counter <= rev.rating %}<svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{% else %}<svg class="icon" style="opacity:.25" aria-hidden="true"><use href="#i-star"/></svg>{% endif %}{% endfor %}
+          </div>
+          <div class="em-quote-title">{% if request.LANGUAGE_CODE == 'en' %}“{{ rev.title|tr:request.LANGUAGE_CODE }}”{% else %}«{{ rev.title|tr:request.LANGUAGE_CODE }}»{% endif %}</div>
+          <p class="em-quote-text">{{ rev.comment|tr:request.LANGUAGE_CODE|truncatewords:30 }}</p>
+          <div class="em-quote-footer">
+            {% with author=rev.user.get_full_name|default:rev.user.email|tr:request.LANGUAGE_CODE %}
+            <span class="em-quote-avatar">{{ author|slice:":1" }}</span>
+            <div style="flex: 1;">
+              <div class="em-quote-name">{{ author }}</div>
+              <div class="em-quote-product">{{ rev.product.name|tr:request.LANGUAGE_CODE|truncatewords:4 }}</div>
+            </div>
+            {% endwith %}
+            {% if rev.is_verified_buyer %}<span class="badge badge-success"><svg class="icon" style="width:.85em;height:.85em" aria-hidden="true"><use href="#i-check"/></svg> {% tr 'Verified Purchase' %}</span>{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+
+<!-- JSON-LD Structured Data: Organization -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "OnlineStore",
+  "name": "{{ site_settings.site_name }}",
+  "description": "{{ site_settings.site_tagline }}",
+  "telephone": "{{ site_settings.phone }}",
+  "email": "{{ site_settings.email }}",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{ site_settings.address }}",
+    "addressCountry": "IR"
+  }
+}
+</script>
+{% endblock %}

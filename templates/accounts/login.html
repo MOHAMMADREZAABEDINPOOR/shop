@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}{% tr 'Sign In to Your Account' %} | {{ site_settings.site_name|tr:request.LANGUAGE_CODE }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="auth-page">
+
+    <div class="auth-side">
+      <div style="font-size: 2.4rem;">🛍️</div>
+      <h2 style="font-size: 1.7rem; font-weight: 900; line-height: 1.4; color:#fff;">
+        {% if request.LANGUAGE_CODE == 'en' %}Welcome Back!{% else %}دوباره خوش برگشتی!{% endif %}<br>
+        <span class="text-gradient-hero">{{ site_settings.site_name|tr:request.LANGUAGE_CODE|default:"Shop" }}</span>
+      </h2>
+      <p style="color:#C9C9D2; font-size:0.92rem; line-height:1.8;">
+        {% if request.LANGUAGE_CODE == 'en' %}
+          Sign in to track orders, access personalized discounts, and complete purchases in seconds.
+        {% else %}
+          وارد شو، سفارش‌هات رو پیگیری کن، از تخفیف‌های شخصی مطلع شو و خریدت رو در چند ثانیه نهایی کن.
+        {% endif %}
+      </p>
+      <div style="display:flex; flex-direction:column; gap:0.7rem; margin-top:0.5rem;">
+        <div class="auth-feature"><span class="auth-feature-icon">⚡</span><span>{% if request.LANGUAGE_CODE == 'en' %}Fast checkout with saved addresses{% else %}تسویه سریع با آدرس‌های ذخیره‌شده{% endif %}</span></div>
+        <div class="auth-feature"><span class="auth-feature-icon">🎁</span><span>{% if request.LANGUAGE_CODE == 'en' %}Exclusive member coupons like WELCOME10{% else %}کوپن‌های اختصاصی اعضا مثل WELCOME10{% endif %}</span></div>
+        <div class="auth-feature"><span class="auth-feature-icon">🔒</span><span>{% if request.LANGUAGE_CODE == 'en' %}Secure login with brute-force protection{% else %}ورود امن با محافظت در برابر حملات{% endif %}</span></div>
+      </div>
+    </div>
+
+    <div class="auth-form-side">
+      <div style="text-align:center; margin-bottom:1.5rem;">
+        <div style="font-size:2rem;">🔑</div>
+        <h1 style="font-size:1.35rem; font-weight:800;">{% tr 'Sign In to Your Account' %}</h1>
+        <p style="font-size:0.85rem; color:var(--text-muted);">{% if request.LANGUAGE_CODE == 'en' %}Sign in to continue shopping{% else %}برای ادامه خرید وارد شو{% endif %}</p>
+      </div>
+
+      <form method="POST" action="{% url 'accounts:login' %}" id="login-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        {# Honeypot anti-bot trap (hidden from humans) #}
+        <div style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
+          <label>Website (do not fill)<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">{% tr 'Email Address:' %}</label>
+          <input type="email" name="email" id="login-email" value="{{ email }}" class="form-input" placeholder="example@domain.com" required autofocus>
+        </div>
+
+        <div class="form-group">
+          <div class="flex justify-between items-center" style="margin-bottom:0.25rem;">
+            <label class="form-label" style="margin-bottom:0;">{% tr 'Password:' %}</label>
+            <a href="{% url 'accounts:forgot_password' %}" style="font-size:0.8rem; color:var(--primary);">{% tr 'Forgot Password?' %}</a>
+          </div>
+          <input type="password" name="password" id="login-password" class="form-input" placeholder="{% if request.LANGUAGE_CODE == 'en' %}Enter your password{% else %}رمز عبور خود را وارد کنید{% endif %}" required>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.86rem; cursor:pointer; margin-block:0.75rem;">
+          <input type="checkbox" name="remember_me" checked class="form-checkbox">
+          <span>{% tr 'Remember Me' %}</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg btn-shimmer" style="margin-bottom:1rem;">
+          {% tr 'Sign In' %}
+        </button>
+
+        <div class="quick-login-box">
+          <p style="font-size:0.8rem; font-weight:700; text-align:center; margin-bottom:0.7rem; color:var(--text-secondary);">{% if request.LANGUAGE_CODE == 'en' %}🚀 Quick Test Login (without typing){% else %}🚀 ورود سریع تستی (بدون تایپ رمز){% endif %}</p>
+          <div class="quick-login-btns">
+            <button type="button" onclick="quickLogin('admin@shop.local', 'AdminPass1234!')" class="btn btn-outline btn-block">{% if request.LANGUAGE_CODE == 'en' %}👑 Admin{% else %}👑 ادمین{% endif %}</button>
+            <button type="button" onclick="quickLogin('customer1@shop.local', 'CustomerPass1234!')" class="btn btn-outline btn-block">{% if request.LANGUAGE_CODE == 'en' %}👤 Customer{% else %}👤 کاربر{% endif %}</button>
+          </div>
+        </div>
+
+        <script>
+          function quickLogin(email, password) {
+            document.getElementById('login-email').value = email;
+            document.getElementById('login-password').value = password;
+            document.getElementById('login-form').submit();
+          }
+        </script>
+
+        <div style="text-align:center; font-size:0.86rem; color:var(--text-secondary); border-top:1px solid var(--border); padding-top:1rem;">
+          {% if request.LANGUAGE_CODE == 'en' %}
+            Don't have an account? <a href="{% url 'accounts:register' %}" style="color:var(--primary); font-weight:700;">Sign up</a>
+          {% else %}
+            حساب نداری؟ <a href="{% url 'accounts:register' %}" style="color:var(--primary); font-weight:700;">ثبت‌نام در سایت</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

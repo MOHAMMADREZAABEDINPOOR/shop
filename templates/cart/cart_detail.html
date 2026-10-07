@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}{% tr 'Cart' %} | {{ site_settings.site_name|tr:request.LANGUAGE_CODE }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- سرتیتر ویرایشی سبد خرید -->
+  <header style="margin-bottom: 1.5rem;">
+    <span style="display: block; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.16em; color: var(--primary); margin-bottom: 0.3rem;">{% tr 'YOUR SELECTION' %}</span>
+    <h1 style="font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 900; letter-spacing: -0.02em; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+      <span>🛒</span> {% tr 'Your Shopping Cart' %} ({% if items %}{{ items|length|num:request.LANGUAGE_CODE }}{% else %}۰{% endif %} <span class="text-gradient-primary">{% tr 'Items' %}</span>)
+    </h1>
+  </header>
+
+  {% if items %}
+    <div class="split-main-side narrow-side">
+      
+      <!-- Items List -->
+      <div class="card reveal" style="padding: 1.5rem; min-width: 0;">
+        <div class="table-scroll">
+        <table id="cart-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border); text-align: start; font-size: 0.88rem; color: var(--text-muted);">
+              <th style="padding-bottom: 0.75rem;">{% tr 'Product' %}</th>
+              <th style="padding-bottom: 0.75rem;">{% tr 'Unit Price' %}</th>
+              <th style="padding-bottom: 0.75rem; text-align: center;">{% tr 'Quantity' %}</th>
+              <th style="padding-bottom: 0.75rem;">{% tr 'Total' %}</th>
+              <th style="padding-bottom: 0.75rem; width: 40px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+              <tr id="cart-row-{{ item.id }}" style="border-bottom: 1px solid var(--border);">
+                <!-- Product info -->
+                <td style="padding-block: 1rem; display: flex; align-items: center; gap: 1rem;">
+                  <img src="{{ item.product.get_primary_image }}" alt="{{ item.product.name|tr:request.LANGUAGE_CODE }}" style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--radius-sm); background: var(--bg-subtle);">
+                  <div>
+                    <a href="{{ item.product.get_absolute_url }}" style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); display: block; margin-bottom: 0.25rem;">
+                      {{ item.product.name|tr:request.LANGUAGE_CODE }}
+                    </a>
+                    {% if item.variant %}
+                      <div style="font-size: 0.8rem; color: var(--text-muted);">
+                        {% tr 'Variant:' %} <span style="color: var(--primary); font-weight: 600;">{{ item.variant.name|tr:request.LANGUAGE_CODE }}</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                </td>
+
+                <!-- Unit price -->
+                <td style="font-size: 0.95rem; font-weight: 600;">
+                  {{ item.get_unit_price|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}
+                </td>
+
+                <!-- Quantity adjust -->
+                <td style="text-align: center;">
+                  <div style="display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;">
+                    <button onclick="updatePageCartItem({{ item.id }}, 'decrease')" style="border:none;background:none;width:28px;height:28px;cursor:pointer;">-</button>
+                    <span id="item-qty-{{ item.id }}" style="width: 32px; text-align: center; font-weight: 700; font-size: 0.9rem;">{{ item.quantity|num:request.LANGUAGE_CODE }}</span>
+                    <button onclick="updatePageCartItem({{ item.id }}, 'increase')" style="border:none;background:none;width:28px;height:28px;cursor:pointer;">+</button>
+                  </div>
+                </td>
+
+                <!-- Line total -->
+                <td id="item-total-{{ item.id }}" style="font-size: 1rem; font-weight: 700; color: var(--primary);">
+                  {{ item.get_total_price|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}
+                </td>
+
+                <!-- Remove -->
+                <td style="text-align: center;">
+                  <button onclick="removeCartItem({{ item.id }})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;" title="{% tr 'Remove' %}">✕</button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <!-- Order Summary Box -->
+      <div class="card reveal" style="padding: 1.5rem; position: sticky; top: 90px; min-width: 0;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+          {% tr 'Order Summary' %}
+        </h3>
+
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.92rem; margin-bottom: 1.25rem;">
+          <div class="flex justify-between">
+            <span style="color: var(--text-secondary);">{% tr 'Items Subtotal:' %}</span>
+            <span id="page-cart-subtotal" style="font-weight: 700;">{{ subtotal|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}</span>
+          </div>
+          <div class="flex justify-between">
+            <span style="color: var(--text-secondary);">{% tr 'Shipping Cost:' %}</span>
+            <span style="font-weight: 700;">
+              {% if shipping_cost == 0 %}
+                <span style="color: var(--success);">{% tr 'Free' %}</span>
+              {% else %}
+                {{ shipping_cost|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}
+              {% endif %}
+            </span>
+          </div>
+        </div>
+
+        <div style="border-top: 2px solid var(--border); padding-top: 1rem; margin-bottom: 1.5rem;" class="flex justify-between items-center">
+          <span style="font-weight: 700; font-size: 1rem;">{% tr 'Total Payable:' %}</span>
+          <span id="page-cart-grandtotal" style="font-size: 1.35rem; font-weight: 800; color: var(--primary);">
+            {{ grand_total|toman:request.LANGUAGE_CODE }} {% tr 'Currency Toman' %}
+          </span>
+        </div>
+
+        <a href="{% url 'orders:checkout' %}" class="btn btn-primary btn-lg btn-block" style="box-shadow: 0 4px 12px var(--primary-glow);">
+          {% tr 'Proceed to Checkout' %} ←
+        </a>
+
+        <div style="text-align: center; margin-top: 1rem;">
+          <a href="{% url 'catalog:shop' %}" style="font-size: 0.85rem; color: var(--text-muted);">
+            ← {% tr 'Return to Shop and Explore Products' %}
+          </a>
+        </div>
+      </div>
+
+    </div>
+  {% else %}
+    <div class="card reveal" style="text-align: center; padding: 4rem 2rem; max-width: 600px; margin: 0 auto;">
+      <div style="font-size: 3.5rem; margin-bottom: 1rem;">🛒</div>
+      <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.75rem;">{% tr 'Your shopping cart is currently empty!' %}</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+        {% if request.LANGUAGE_CODE == 'en' %}
+          Explore our products and add items to your cart.
+        {% else %}
+          می‌توانید برای مشاهده محصولات و افزودن کالاهای مورد نیاز به فروشگاه مراجعه فرمایید.
+        {% endif %}
+      </p>
+      <a href="{% url 'catalog:shop' %}" class="btn btn-primary btn-lg">
+        {% tr 'View Products' %} {% if request.LANGUAGE_CODE == 'en' %}→{% else %}←{% endif %}
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+function updatePageCartItem(itemId, action) {
+  fetch(`/cart/api/update/${itemId}/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken') || ''
+    },
+    body: JSON.stringify({ action: action })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      if (data.item_deleted) {
+        document.getElementById(`cart-row-${itemId}`)?.remove();
+        if (data.cart_item_count === 0) window.location.reload();
+      } else {
+        const qtyEl = document.getElementById(`item-qty-${itemId}`);
+        const totalEl = document.getElementById(`item-total-${itemId}`);
+        if (qtyEl) qtyEl.textContent = data.item_quantity;
+        if (totalEl) totalEl.textContent = `${data.item_total} {% tr 'Currency Toman' %}`;
+      }
+      document.getElementById('page-cart-subtotal').textContent = `${data.subtotal} {% tr 'Currency Toman' %}`;
+      document.getElementById('page-cart-grandtotal').textContent = `${data.grand_total} {% tr 'Currency Toman' %}`;
+      updateCartBadge(data.cart_item_count);
+      showToast(data.message, 'info');
+    } else {
+      showToast(data.message, 'danger');
+    }
+  });
+}
+</script>
+{% endblock %}

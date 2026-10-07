@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static shop_filters %}
+
+{% block title %}{{ title|tr:request.LANGUAGE_CODE }} | {{ site_settings.site_name|tr:request.LANGUAGE_CODE }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 2rem auto;">
+  <div class="card" style="padding: 2.5rem;">
+    <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem; border-bottom: 2px solid var(--border); padding-bottom: 0.75rem;">
+      {{ title|tr:request.LANGUAGE_CODE }}
+    </h1>
+    <div style="font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary);">
+      {{ content|tr:request.LANGUAGE_CODE|linebreaks }}
+    </div>
+  </div>
+</div>
+{% endblock %}
